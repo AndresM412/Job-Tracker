@@ -26,11 +26,21 @@ function App() {
   function deleteJob(id: string) {
     setJobs((currentJobs) => currentJobs.filter((job) => job.id !== id));
   }
+  function updateJob(updatedJob: JobApplication) {
+    setJobs((currentJobs) =>
+      currentJobs.map((job) => (job.id === updatedJob.id ? updatedJob : job)),
+    );
+    setEditingJob(null);
+  }
   return (
     <>
       <h1>Job Tracker</h1>
-      <JobForm onAddJob={addJob} />
-      <JobList jobs={jobs} onDeleteJob={deleteJob} />
+      <JobForm
+        onAddJob={addJob}
+        onUpdateJob={updateJob}
+        editingJob={editingJob}
+      />
+      <JobList jobs={jobs} onDeleteJob={deleteJob} onEditJob={setEditingJob} />
     </>
   );
 }

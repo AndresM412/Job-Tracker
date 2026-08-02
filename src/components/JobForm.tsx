@@ -1,15 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { type JobApplication, type JobStatus } from "../types/job";
 
 type JobFormProps = {
   onAddJob: (job: JobApplication) => void;
+  onUpdateJob: (job: JobApplication) => void;
+  editingJob: JobApplication | null;
 };
 
-function JobForm({ onAddJob }: JobFormProps) {
+function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
   const [company, setCompany] = useState("");
   const [position, setPosition] = useState("");
   const [status, setStatus] = useState<JobApplication["status"]>("Applied");
   const [applicationDate, setApplicationDate] = useState("");
+
+  useEffect(() => {
+    if (editingJob) {
+      setCompany(editingJob.company);
+      setPosition(editingJob.position);
+      setStatus(editingJob.status);
+      setApplicationDate(editingJob.applicationDate);
+    }
+  }, [editingJob]);
+
   const isFormValid =
     company.trim() !== "" &&
     position.trim() !== "" &&
@@ -17,15 +29,27 @@ function JobForm({ onAddJob }: JobFormProps) {
     applicationDate.trim() !== "";
 
   function handleSubmit() {
-    const newJob: JobApplication = {
-      id: Date.now().toString(),
-      company,
-      position,
-      status,
-      applicationDate,
-    };
-
-    onAddJob(newJob);
+    if (editingJob) {
+      // Modo edición: mantenemos el mismo id
+      const updatedJob: JobApplication = {
+        id: editingJob.id,
+        company,
+        position,
+        status,
+        applicationDate,
+      };
+      onUpdateJob(updatedJob);
+    } else {
+      // Modo creación
+      const newJob: JobApplication = {
+        id: Date.now().toString(),
+        company,
+        position,
+        status,
+        applicationDate,
+      };
+      onAddJob(newJob);
+    }
 
     setCompany("");
     setPosition("");
@@ -64,7 +88,7 @@ function JobForm({ onAddJob }: JobFormProps) {
       />
 
       <button disabled={!isFormValid} onClick={handleSubmit}>
-        Add Job
+        {editingJob ? "Save Changes" : "Add Job"}
       </button>
     </>
   );
