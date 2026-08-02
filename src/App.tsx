@@ -33,15 +33,17 @@ function App() {
     setEditingJob(null);
   }
   return (
-    <>
-      <h1>Job Tracker</h1>
+    <div className="min-h-screen bg-bg px-6 py-12 max-w-5xl mx-auto">
+      <h1 className="font-display text-3xl font-bold text-text mb-10">
+        Job Tracker
+      </h1>
       <JobForm
         onAddJob={addJob}
         onUpdateJob={updateJob}
         editingJob={editingJob}
       />
       <JobList jobs={jobs} onDeleteJob={deleteJob} onEditJob={setEditingJob} />
-    </>
+    </div>
   );
 }
 

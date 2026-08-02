@@ -58,39 +58,49 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
   }
 
   return (
-    <>
-      <input
-        value={company}
-        onChange={(e) => setCompany(e.target.value)}
-        placeholder="Company"
-      />
+    <div className="bg-surface border border-border rounded-lg p-5 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <input
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          placeholder="Company"
+          className="input-field"
+        />
 
-      <input
-        value={position}
-        onChange={(e) => setPosition(e.target.value)}
-        placeholder="Position"
-      />
+        <input
+          value={position}
+          onChange={(e) => setPosition(e.target.value)}
+          placeholder="Position"
+          className="input-field"
+        />
 
-      <select
-        value={status}
-        onChange={(e) => setStatus(e.target.value as JobStatus)}
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value as JobStatus)}
+          className="input-field"
+        >
+          <option value="Applied">Applied</option>
+          <option value="Interview">Interview</option>
+          <option value="Offer">Offer</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+
+        <input
+          type="date"
+          value={applicationDate}
+          onChange={(e) => setApplicationDate(e.target.value)}
+          className="input-field font-(--font-mono)"
+        />
+      </div>
+
+      <button
+        disabled={!isFormValid}
+        onClick={handleSubmit}
+        className="btn-submit mt-4"
       >
-        <option value="Applied">Applied</option>
-        <option value="Interview">Interview</option>
-        <option value="Offer">Offer</option>
-        <option value="Rejected">Rejected</option>
-      </select>
-
-      <input
-        type="date"
-        value={applicationDate}
-        onChange={(e) => setApplicationDate(e.target.value)}
-      />
-
-      <button disabled={!isFormValid} onClick={handleSubmit}>
         {editingJob ? "Save Changes" : "Add Job"}
       </button>
-    </>
+    </div>
   );
 }
 

@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-bg: #0f0e17;
+  --color-surface: #1a1825;
+  --color-border: #2e2a3d;
+  --color-text: #e9e6f0;
+  --color-muted: #9691a8;
+
+  --color-applied: #f5a65b;
+  --color-interview: #8b7fe8;
+  --color-offer: #5fd9a8;
+  --color-rejected: #e8607c;
+}
+
+body {
+  background-color: var(--color-bg);
+  font-family: var(--font-body);
+}
+
+@layer components {
+  .input-field {
+    @apply bg-bg border border-border rounded-md px-3 py-2 text-sm text-text placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-interview;
+  }
+  
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.5);
+    cursor: pointer;
+  }
+
+  .btn-edit {
+    @apply text-xs px-3 py-1.5 rounded-md border border-border transition-colors text-text hover:bg-border;
+  }
+
+  .btn-delete {
+    @apply text-xs px-3 py-1.5 rounded-md border border-border transition-colors text-rejected hover:bg-rejected/10;
+  }
+
+  .btn-submit {
+    @apply bg-interview text-bg text-sm font-medium px-4 py-2 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition-all;
+  }
+}

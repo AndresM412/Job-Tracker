@@ -1,30 +1,22 @@
-import { type JobStatus} from "../types/job";
+import { type JobStatus } from "../types/job";
 
 type StatusBadgeProps = {
-    status: JobStatus
+  status: JobStatus;
+};
+
+const statusConfig: Record<JobStatus, { message: string; icon: string; color: string }> = {
+  Applied: { message: "Application Applied!", icon: "⏳", color: "var(--color-applied)" },
+  Interview: { message: "Application Interviewed!", icon: "🎉", color: "var(--color-interview)" },
+  Offer: { message: "Application Offer!", icon: "🚀", color: "var(--color-offer)" },
+  Rejected: { message: "Application Rejected!", icon: "❌", color: "var(--color-rejected)" },
 };
 
 function StatusBadge({ status }: StatusBadgeProps) {
-  let statusMessage = "";
-  let statusIcon = "";
-
-  if (status === "Applied") {
-    statusMessage = "Application Applied!";
-    statusIcon = "⏳";
-  } else if (status === "Interview") {
-    statusMessage = "Application Interviewed!";
-    statusIcon = "🎉";
-  } else if (status === "Offer") {
-    statusMessage = "Application Offer!";
-    statusIcon = "🚀";
-  } else if (status === "Rejected") {
-    statusMessage = "Application Rejected!";
-    statusIcon = "❌";
-  }
+  const { message, icon, color } = statusConfig[status];
 
   return (
-    <p>
-      {statusIcon} {statusMessage}
+    <p className="text-sm font-medium" style={{ color }}>
+      {icon} {message}
     </p>
   );
 }
