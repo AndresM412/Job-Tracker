@@ -10,4 +10,5 @@ export type JobApplication = {
   position: string;
   status: JobStatus;
   applicationDate: string;
+  notes?: string;
 };

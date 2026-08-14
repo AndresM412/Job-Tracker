@@ -12,6 +12,7 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
   const [position, setPosition] = useState("");
   const [status, setStatus] = useState<JobApplication["status"]>("Applied");
   const [applicationDate, setApplicationDate] = useState("");
+  const [notes, setNotes] = useState("");
 
   useEffect(() => {
     if (editingJob) {
@@ -19,6 +20,7 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
       setPosition(editingJob.position);
       setStatus(editingJob.status);
       setApplicationDate(editingJob.applicationDate);
+      setNotes(editingJob.notes ?? "");
     }
   }, [editingJob]);
 
@@ -37,6 +39,7 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
         position,
         status,
         applicationDate,
+        notes: notes.trim() === "" ? undefined : notes,
       };
       onUpdateJob(updatedJob);
     } else {
@@ -47,6 +50,7 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
         position,
         status,
         applicationDate,
+        notes: notes.trim() === "" ? undefined : notes,
       };
       onAddJob(newJob);
     }
@@ -55,15 +59,17 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
     setPosition("");
     setStatus("Applied");
     setApplicationDate("");
+    setNotes("");
   }
 
   return (
     <div className="bg-surface border border-border rounded-lg p-5 mb-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-4 gap-3">
         <input
           value={company}
           onChange={(e) => setCompany(e.target.value)}
           placeholder="Company"
+          maxLength={30}
           className="input-field"
         />
 
@@ -71,6 +77,7 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
           value={position}
           onChange={(e) => setPosition(e.target.value)}
           placeholder="Position"
+          maxLength={30}
           className="input-field"
         />
 
@@ -92,6 +99,13 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
           className="input-field font-(--font-mono)"
         />
       </div>
+      <textarea
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        placeholder="Notes (optional) — job link, description, or anything else"
+        rows={3}
+        className="input-field w-full mt-3 resize-none"
+      />
 
       <button
         disabled={!isFormValid}
