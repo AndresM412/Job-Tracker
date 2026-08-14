@@ -43,7 +43,7 @@ function JobItem({ job, onDeleteJob, onEditJob }: JobItemProps) {
           <div className="flex gap-2 mt-auto pt-3">
             <button
               onClick={(e) => {
-                e.stopPropagation;
+                e.stopPropagation();
                 onEditJob(job);
               }}
               className="btn-edit"
