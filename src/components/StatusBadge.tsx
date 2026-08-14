@@ -15,7 +15,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
   const { message, icon, color } = statusConfig[status];
 
   return (
-    <p className="text-sm font-medium" style={{ color }}>
+    <p className="text-sm font-black" style={{ color }}>
       {icon} {message}
     </p>
   );
