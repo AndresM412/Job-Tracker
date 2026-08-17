@@ -5,16 +5,12 @@ import JobForm from "./components/JobForm";
 import FilterBar, { type FilterValue } from "./components/filters/FilterBar";
 import SearchBar from "./components/filters/SearchBar";
 import SortControl, { type SortOrder } from "./components/filters/SortControl";
+import * as jobsApi from "./services/jobsApi";
 
 function App() {
-  const [jobs, setJobs] = useState<JobApplication[]>(() => {
-    const savedJobs = localStorage.getItem("jobs");
-
-    if (savedJobs) {
-      return JSON.parse(savedJobs);
-    }
-    return [];
-  });
+  const [jobs, setJobs] = useState<JobApplication[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [editingJob, setEditingJob] = useState<JobApplication | null>(null);
   const [filterStatus, setFilterStatus] = useState<FilterValue>("All");
@@ -22,21 +18,53 @@ function App() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   useEffect(() => {
-    localStorage.setItem("jobs", JSON.stringify(jobs));
-  }, [jobs]);
+    async function loadJobs() {
+      try {
+        setIsLoading(true);
+        const data = await jobsApi.fetchJobs();
+        setJobs(data);
+        setError(null);
+      } catch (err) {
+        setError(
+          "No se pudieron cargar las postulaciones. ¿Está el servidor corriendo?",
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
-  function addJob(newJob: JobApplication) {
-    setJobs((currentJobs) => [...currentJobs, newJob]);
+    loadJobs();
+  }, []);
+
+  async function addJob(newJob: JobApplication) {
+    try {
+      const { id, ...jobData } = newJob;
+      const createdJob = await jobsApi.createJob(jobData);
+      setJobs((currentJobs) => [...currentJobs, createdJob]);
+    } catch (err) {
+      setError("No se pudo crear la postulación.");
+    }
   }
 
-  function deleteJob(id: string) {
-    setJobs((currentJobs) => currentJobs.filter((job) => job.id !== id));
+  async function deleteJob(id: string) {
+    try {
+      await jobsApi.deleteJob(id);
+      setJobs((currentJobs) => currentJobs.filter((job) => job.id !== id));
+    } catch (err) {
+      setError("No se pudo eliminar la postulación.");
+    }
   }
-  function updateJob(updatedJob: JobApplication) {
-    setJobs((currentJobs) =>
-      currentJobs.map((job) => (job.id === updatedJob.id ? updatedJob : job)),
-    );
-    setEditingJob(null);
+
+  async function updateJob(updatedJob: JobApplication) {
+    try {
+      const savedJob = await jobsApi.updateJob(updatedJob);
+      setJobs((currentJobs) =>
+        currentJobs.map((job) => (job.id === savedJob.id ? savedJob : job)),
+      );
+      setEditingJob(null);
+    } catch (err) {
+      setError("No se pudo actualizar la postulación.");
+    }
   }
   const statusFiltered =
     filterStatus === "All"
@@ -63,6 +91,13 @@ function App() {
       <h1 className="font-display text-3xl font-bold text-text mb-10 text-center">
         Job Tracker
       </h1>
+
+      {error && (
+        <div className="bg-rejected/10 border border-rejected text-rejected text-sm rounded-lg p-3 mb-4">
+          {error}
+        </div>
+      )}
+
       <JobForm
         onAddJob={addJob}
         onUpdateJob={updateJob}
@@ -78,7 +113,18 @@ function App() {
         <SortControl value={sortOrder} onChange={setSortOrder} />
       </div>
 
-      <JobList jobs={sortedJobs} onDeleteJob={deleteJob} onEditJob={setEditingJob} />
+      {isLoading ? (
+        <div className="text-center py-16 text-muted text-sm">
+          Loading applications...
+        </div>
+      ) : (
+        
+        <JobList
+          jobs={sortedJobs}
+          onDeleteJob={deleteJob}
+          onEditJob={setEditingJob}
+        />
+      )}
     </div>
   );
 }
