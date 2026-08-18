@@ -47,6 +47,7 @@ jobs:
     - name: Run Playwright tests
       env:
         DATABASE_URL: postgresql://jobtracker:jobtracker123@localhost:5432/job_tracker_db
+        VITE_API_URL: http://127.0.0.1:8000
       run: npx playwright test
 
     - uses: actions/upload-artifact@v4
