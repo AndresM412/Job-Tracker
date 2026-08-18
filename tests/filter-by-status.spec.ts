@@ -1,9 +1,9 @@
 import { test, expect, type Page } from '@playwright/test';
+import { clearAllJobs } from './helpers';
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, request }) => {
+  await clearAllJobs(request);
   await page.goto('/');
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
 });
 
 async function addJob(page: Page, company: string, position: string, status: string, date: string) {

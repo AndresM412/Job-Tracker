@@ -1,11 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { clearAllJobs } from './helpers';
 
-test.beforeEach(async ({ page }) => {
-  // Empezamos cada test con localStorage limpio, para que no
-  // arrastre datos de pruebas anteriores
+test.beforeEach(async ({ page, request }) => {
+  await clearAllJobs(request);
   await page.goto('/');
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
 });
 
 test('el usuario puede agregar una nueva postulación', async ({ page }) => {

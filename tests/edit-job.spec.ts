@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { clearAllJobs } from './helpers';
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, request }) => {
+  await clearAllJobs(request);
   await page.goto('/');
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
 });
 
 test('el usuario puede editar una postulación existente', async ({ page }) => {
