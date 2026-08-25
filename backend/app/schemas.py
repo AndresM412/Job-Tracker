@@ -20,3 +20,16 @@ class JobApplicationResponse(JobApplicationBase):
 
     class Config:
         from_attributes = True
+
+class UserBase(BaseModel):
+    email: str
+    password:  str
+    
+class UserCreate(UserBase):
+    pass
+
+class UserResponse(BaseModel):
+    id: str
+    email: str
+    class Config:
+        from_attributes = True

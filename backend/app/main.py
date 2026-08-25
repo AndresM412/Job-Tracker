@@ -19,11 +19,6 @@ app.add_middleware(
 )
 
 
-@app.get("/")
-def read_root():
-    return {"message": "Job Tracker API is running"}
-
-
 @app.get("/jobs", response_model=List[schemas.JobApplicationResponse])
 def read_jobs(db: Session = Depends(get_db)):
     return crud.get_jobs(db)
@@ -48,3 +43,8 @@ def delete_job(job_id: str, db: Session = Depends(get_db)):
     if db_job is None:
         raise HTTPException(status_code=404, detail="Job not found")
     return {"message": "Job deleted successfully"}
+
+
+@app.post("/register", response_model=schemas.UserResponse)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    return crud.create_user(db, user)
