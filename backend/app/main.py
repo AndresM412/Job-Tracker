@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.database import Base, engine, get_db
-from app import models, schemas, crud
+from app import models, schemas, crud, auth
 
 Base.metadata.create_all(bind=engine)
 
@@ -48,3 +48,13 @@ def delete_job(job_id: str, db: Session = Depends(get_db)):
 @app.post("/register", response_model=schemas.UserResponse)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db, user)
+
+@app.post("/login", response_model=schemas.Token)
+def user_login(user: schemas.UserLogin, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_email(db, user.email)
+
+    if db_user is None or not auth.verify_password(user.password, db_user.hashed_password):
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
+
+    access_token = auth.create_access_token(data={"sub": str(db_user.id)})
+    return {"access_token": access_token, "token_type": "bearer"}

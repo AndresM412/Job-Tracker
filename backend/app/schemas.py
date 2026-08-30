@@ -33,3 +33,10 @@ class UserResponse(BaseModel):
     email: str
     class Config:
         from_attributes = True
+        
+class UserLogin(UserBase):
+    pass
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
