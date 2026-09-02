@@ -39,7 +39,9 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: "venv\\Scripts\\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+      command: process.env.CI
+        ? "uvicorn app.main:app --host 127.0.0.1 --port 8000"
+        : "venv\\Scripts\\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
       cwd: "./backend",
       url: "http://127.0.0.1:8000/jobs",
       reuseExistingServer: !process.env.CI,
