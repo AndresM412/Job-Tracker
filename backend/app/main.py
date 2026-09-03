@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -20,14 +21,19 @@ app.add_middleware(
 
 
 @app.get("/jobs", response_model=List[schemas.JobApplicationResponse])
-def read_jobs(db: Session = Depends(get_db)):
-    return crud.get_jobs(db)
-
+def read_jobs(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    return crud.get_jobs(db, user_id=current_user.id)
 
 @app.post("/jobs", response_model=schemas.JobApplicationResponse)
-def create_job(job: schemas.JobApplicationCreate, db: Session = Depends(get_db)):
-    return crud.create_job(db, job)
-
+def create_job(
+    job: schemas.JobApplicationCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    return crud.create_job(db, job, user_id=current_user.id)
 
 @app.put("/jobs/{job_id}", response_model=schemas.JobApplicationResponse)
 def update_job(job_id: str, job: schemas.JobApplicationCreate, db: Session = Depends(get_db)):
@@ -49,11 +55,15 @@ def delete_job(job_id: str, db: Session = Depends(get_db)):
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db, user)
 
-@app.post("/login", response_model=schemas.Token)
-def user_login(user: schemas.UserLogin, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, user.email)
 
-    if db_user is None or not auth.verify_password(user.password, db_user.hashed_password):
+@app.post("/login", response_model=schemas.Token)
+def user_login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+    db_user = crud.get_user_by_email(db, form_data.username)
+
+    if db_user is None or not auth.verify_password(form_data.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Incorrect email or password")
 
     access_token = auth.create_access_token(data={"sub": str(db_user.id)})
