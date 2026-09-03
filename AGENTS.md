@@ -55,7 +55,7 @@ velocidad de entrega.
 
 ## Estado actual
 
-Backend: registro y login con JWT funcionando. POST /jobs y GET /jobs protegidos con el usuario autenticado (filtrado por user_id). Pendiente: proteger PUT/DELETE de /jobs y revertir user_id a NOT NULL en la base de datos.
+Backend: registro y login con JWT funcionando. Todos los endpoints de /jobs (GET, POST, PUT, DELETE) protegidos con autenticación JWT y filtrados por el user_id del usuario autenticado. Columna user_id en job_applications restituida a NOT NULL (nullable=False).
 
 Frontend: aún sin pantallas de login/registro, sin manejo de token.
 

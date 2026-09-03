@@ -27,6 +27,7 @@ def read_jobs(
 ):
     return crud.get_jobs(db, user_id=current_user.id)
 
+
 @app.post("/jobs", response_model=schemas.JobApplicationResponse)
 def create_job(
     job: schemas.JobApplicationCreate,
@@ -35,17 +36,27 @@ def create_job(
 ):
     return crud.create_job(db, job, user_id=current_user.id)
 
+
 @app.put("/jobs/{job_id}", response_model=schemas.JobApplicationResponse)
-def update_job(job_id: str, job: schemas.JobApplicationCreate, db: Session = Depends(get_db)):
-    db_job = crud.update_job(db, job_id, job)
+def update_job(
+    job_id: str,
+    job: schemas.JobApplicationCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    db_job = crud.update_job(db, job_id, job, user_id=current_user.id)
     if db_job is None:
         raise HTTPException(status_code=404, detail="Job not found")
     return db_job
 
 
 @app.delete("/jobs/{job_id}")
-def delete_job(job_id: str, db: Session = Depends(get_db)):
-    db_job = crud.delete_job(db, job_id)
+def delete_job(
+    job_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    db_job = crud.delete_job(db, job_id, user_id=current_user.id)
     if db_job is None:
         raise HTTPException(status_code=404, detail="Job not found")
     return {"message": "Job deleted successfully"}

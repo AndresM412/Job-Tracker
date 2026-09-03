@@ -9,8 +9,11 @@ def get_jobs(db: Session, user_id: str):
     return db.query(models.JobApplication).filter(models.JobApplication.user_id == user_id).all()
 
 
-def get_job(db: Session, job_id: str):
-    return db.query(models.JobApplication).filter(models.JobApplication.id == job_id).first()
+def get_job(db: Session, job_id: str, user_id: str):
+    return db.query(models.JobApplication).filter(
+        models.JobApplication.id == job_id,
+        models.JobApplication.user_id == user_id
+    ).first()
 
 
 def create_job(db: Session, job: schemas.JobApplicationCreate, user_id: str):
@@ -25,8 +28,8 @@ def create_job(db: Session, job: schemas.JobApplicationCreate, user_id: str):
     return db_job
 
 
-def update_job(db: Session, job_id: str, job: schemas.JobApplicationCreate):
-    db_job = get_job(db, job_id)
+def update_job(db: Session, job_id: str, job: schemas.JobApplicationCreate, user_id: str):
+    db_job = get_job(db, job_id, user_id)
     if db_job is None:
         return None
     for key, value in job.model_dump().items():
@@ -36,8 +39,8 @@ def update_job(db: Session, job_id: str, job: schemas.JobApplicationCreate):
     return db_job
 
 
-def delete_job(db: Session, job_id: str):
-    db_job = get_job(db, job_id)
+def delete_job(db: Session, job_id: str, user_id: str):
+    db_job = get_job(db, job_id, user_id)
     if db_job is None:
         return None
     db.delete(db_job)
