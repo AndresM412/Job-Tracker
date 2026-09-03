@@ -57,6 +57,6 @@ velocidad de entrega.
 
 Backend: registro y login con JWT funcionando. Todos los endpoints de /jobs (GET, POST, PUT, DELETE) protegidos con autenticación JWT y filtrados por el user_id del usuario autenticado. Columna user_id en job_applications restituida a NOT NULL (nullable=False).
 
-Frontend: aún sin pantallas de login/registro, sin manejo de token.
+Frontend: pantallas de Login y Registro (AuthForm) conectadas con JWT, persistencia de token en localStorage y barra superior con usuario/logout.
 
-Tests: aún no actualizados para requerir login antes de operar sobre jobs.
+Tests: los 24 tests E2E de Playwright actualizados con inyección de sesión autenticada en localStorage pasando 100% en verde (Chromium, Firefox, WebKit).

@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
-import { clearAllJobs } from './helpers';
+import { setupAuthenticatedSession } from './helpers';
 
 test.beforeEach(async ({ page, request }) => {
-  await clearAllJobs(request);
+  await setupAuthenticatedSession(page, request);
   await page.goto('/');
 });
 
@@ -10,7 +10,9 @@ async function addJob(page: Page, company: string, position: string, date: strin
   await page.getByPlaceholder('Company', { exact: true }).fill(company);
   await page.getByPlaceholder('Position', { exact: true }).fill(position);
   await page.locator('input[type="date"]').fill(date);
+  await expect(page.getByRole('button', { name: 'Add Job' })).toBeEnabled();
   await page.getByRole('button', { name: 'Add Job' }).click();
+  await expect(page.getByTestId(`job-card-${company}`)).toBeVisible();
 }
 
 test('el usuario puede buscar postulaciones por texto', async ({ page }) => {

@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
-import { clearAllJobs } from './helpers';
+import { setupAuthenticatedSession } from './helpers';
 
 test.beforeEach(async ({ page, request }) => {
-  await clearAllJobs(request);
+  await setupAuthenticatedSession(page, request);
   await page.goto('/');
 });
 
