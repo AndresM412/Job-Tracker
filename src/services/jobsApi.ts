@@ -1,9 +1,18 @@
 import { type JobApplication } from "../types/job";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+function getAuthHeaders(): Record<string, string> {
+  const token = localStorage.getItem("job_tracker_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export async function fetchJobs(): Promise<JobApplication[]> {
-  const response = await fetch(`${API_URL}/jobs`);
+  const response = await fetch(`${API_URL}/jobs`, {
+    headers: {
+      ...getAuthHeaders(),
+    },
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch jobs");
   }
@@ -14,7 +23,10 @@ export async function fetchJobs(): Promise<JobApplication[]> {
 export async function createJob(job: Omit<JobApplication, "id">): Promise<JobApplication> {
   const response = await fetch(`${API_URL}/jobs`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
     body: JSON.stringify(mapToApi(job)),
   });
   if (!response.ok) {
@@ -27,7 +39,10 @@ export async function createJob(job: Omit<JobApplication, "id">): Promise<JobApp
 export async function updateJob(job: JobApplication): Promise<JobApplication> {
   const response = await fetch(`${API_URL}/jobs/${job.id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
     body: JSON.stringify(mapToApi(job)),
   });
   if (!response.ok) {
@@ -40,6 +55,9 @@ export async function updateJob(job: JobApplication): Promise<JobApplication> {
 export async function deleteJob(id: string): Promise<void> {
   const response = await fetch(`${API_URL}/jobs/${id}`, {
     method: "DELETE",
+    headers: {
+      ...getAuthHeaders(),
+    },
   });
   if (!response.ok) {
     throw new Error("Failed to delete job");

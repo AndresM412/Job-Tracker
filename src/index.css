@@ -33,14 +33,18 @@ body {
   }
 
   .btn-edit {
-    @apply text-xs px-3 py-1.5 rounded-md border border-border transition-colors text-text hover:bg-border;
+    @apply text-xs px-3 py-1.5 rounded-md border border-border transition-colors text-text hover:bg-border cursor-pointer;
   }
 
   .btn-delete {
-    @apply text-xs px-3 py-1.5 rounded-md border border-border transition-colors text-rejected hover:bg-rejected/10;
+    @apply text-xs px-3 py-1.5 rounded-md border border-border transition-colors text-rejected hover:bg-rejected/10 cursor-pointer;
   }
 
   .btn-submit {
-    @apply bg-interview text-bg text-sm font-medium px-4 py-2 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition-all;
+    @apply bg-interview text-bg text-sm font-medium px-4 py-2 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition-all cursor-pointer;
+  }
+
+  .btn-secondary {
+    @apply border border-border text-text text-sm font-medium px-4 py-2 rounded-md hover:bg-border transition-all cursor-pointer;
   }
 }
