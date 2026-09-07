@@ -1,3 +1,7 @@
+import os
+# Forzar base de datos SQLite en memoria antes de importar la app en CI o pruebas
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine

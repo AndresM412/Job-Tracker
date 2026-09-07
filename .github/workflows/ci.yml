@@ -45,6 +45,8 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Backend Pytest tests
+        env:
+          DATABASE_URL: sqlite:///:memory:
         run: pytest backend
 
       - name: Run Playwright tests
