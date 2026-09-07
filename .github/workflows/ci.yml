@@ -1,0 +1,62 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: jobtracker
+          POSTGRES_PASSWORD: jobtracker123
+          POSTGRES_DB: job_tracker_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Backend Pytest tests
+        run: pytest backend
+
+      - name: Run Playwright tests
+        env:
+          DATABASE_URL: postgresql://jobtracker:jobtracker123@localhost:5432/job_tracker_db
+          VITE_API_URL: http://127.0.0.1:8000
+          SECRET_KEY: dev-secret-key-change-in-production-12345
+        run: npx playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
