@@ -46,7 +46,7 @@ jobs:
 
       - name: Run Backend Pytest tests
         env:
-          DATABASE_URL: sqlite:///:memory:
+          DATABASE_URL: "sqlite:///:memory:"
         run: pytest backend
 
       - name: Run Playwright tests
