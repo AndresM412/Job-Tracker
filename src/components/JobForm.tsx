@@ -103,7 +103,7 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
         placeholder="Notes (optional) — job link, description, or anything else"
-        rows={3}
+        rows={10}
         className="input-field w-full mt-3 resize-none"
       />
 

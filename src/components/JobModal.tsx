@@ -6,6 +6,28 @@ type JobModalProps = {
   onClose: () => void;
 };
 
+function renderFormattedNotes(text: string) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-interview underline hover:brightness-125 break-all"
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
 function JobModal({ job, onClose }: JobModalProps) {
   return (
     <div
@@ -13,7 +35,7 @@ function JobModal({ job, onClose }: JobModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-surface border border-border rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto"
+        className="bg-surface border border-border rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-2 mb-4">
@@ -40,7 +62,7 @@ function JobModal({ job, onClose }: JobModalProps) {
         <div className="mt-4 pt-4 border-t border-border">
           <h3 className="text-sm font-medium text-text mb-2">Notes</h3>
           <p className="text-sm text-muted whitespace-pre-wrap break-words">
-            {job.notes ? job.notes : "No notes added yet."}
+            {job.notes ? renderFormattedNotes(job.notes) : "No notes added yet."}
           </p>
         </div>
       </div>
