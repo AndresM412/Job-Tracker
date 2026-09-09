@@ -55,8 +55,8 @@ velocidad de entrega.
 
 ## Estado actual
 
-Backend: registro y login con JWT funcionando. Todos los endpoints de /jobs (GET, POST, PUT, DELETE) protegidos con autenticación JWT y filtrados por el user_id del usuario autenticado. Columna user_id en job_applications restituida a NOT NULL (nullable=False).
+Backend: registro y login con JWT funcionando. Todos los endpoints de /jobs (GET, POST, PUT, DELETE) protegidos con autenticación JWT y filtrados por el user_id del usuario autenticado. Suite de pruebas backend con Pytest (8/8 pasadas en verde con SQLite en memoria) cubriendo /register, /login, JWT y aislamiento multi-tenancy.
 
 Frontend: pantallas de Login y Registro (AuthForm) conectadas con JWT, persistencia de token en localStorage y barra superior con usuario/logout.
 
-Tests: los 24 tests E2E de Playwright actualizados con inyección de sesión autenticada en localStorage pasando 100% en verde (Chromium, Firefox, WebKit).
+Tests: los 24 tests E2E de Playwright (Chromium, Firefox, WebKit) y los 8 tests backend con Pytest pasando 100% en verde integrados en GitHub Actions CI (ci.yml).

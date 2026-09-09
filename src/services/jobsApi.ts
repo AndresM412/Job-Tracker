@@ -13,6 +13,9 @@ export async function fetchJobs(): Promise<JobApplication[]> {
       ...getAuthHeaders(),
     },
   });
+  if (response.status === 401) {
+    throw new Error("SESSION_EXPIRED");
+  }
   if (!response.ok) {
     throw new Error("Failed to fetch jobs");
   }
@@ -29,6 +32,9 @@ export async function createJob(job: Omit<JobApplication, "id">): Promise<JobApp
     },
     body: JSON.stringify(mapToApi(job)),
   });
+  if (response.status === 401) {
+    throw new Error("SESSION_EXPIRED");
+  }
   if (!response.ok) {
     throw new Error("Failed to create job");
   }
@@ -45,6 +51,9 @@ export async function updateJob(job: JobApplication): Promise<JobApplication> {
     },
     body: JSON.stringify(mapToApi(job)),
   });
+  if (response.status === 401) {
+    throw new Error("SESSION_EXPIRED");
+  }
   if (!response.ok) {
     throw new Error("Failed to update job");
   }
@@ -59,6 +68,9 @@ export async function deleteJob(id: string): Promise<void> {
       ...getAuthHeaders(),
     },
   });
+  if (response.status === 401) {
+    throw new Error("SESSION_EXPIRED");
+  }
   if (!response.ok) {
     throw new Error("Failed to delete job");
   }

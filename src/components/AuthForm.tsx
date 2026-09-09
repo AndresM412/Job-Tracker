@@ -3,14 +3,15 @@ import { loginApi, registerApi } from "../services/authApi";
 
 interface AuthFormProps {
   onSuccess: (token: string, email: string) => void;
+  initialError?: string | null;
 }
 
-export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
+export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess, initialError }) => {
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError ?? null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -25,6 +25,8 @@ function App() {
   const [searchText, setSearchText] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
+  const [authNotice, setAuthNotice] = useState<string | null>(null);
+
   useEffect(() => {
     if (!token) return;
 
@@ -34,7 +36,11 @@ function App() {
         const data = await jobsApi.fetchJobs();
         setJobs(data);
         setError(null);
-      } catch (err) {
+      } catch (err: any) {
+        if (err?.message === "SESSION_EXPIRED") {
+          handleLogout("Tu sesión ha expirado por inactividad. Por favor, vuelve a iniciar sesión.");
+          return;
+        }
         setError(
           "No se pudieron cargar las postulaciones. ¿Está el servidor corriendo?",
         );
@@ -51,18 +57,22 @@ function App() {
     localStorage.setItem("job_tracker_user_email", email);
     setToken(newToken);
     setUserEmail(email);
+    setAuthNotice(null);
   };
 
-  const handleLogout = () => {
+  const handleLogout = (notice?: string) => {
     localStorage.removeItem("job_tracker_token");
     localStorage.removeItem("job_tracker_user_email");
     setToken(null);
     setUserEmail(null);
     setJobs([]);
+    if (notice) {
+      setAuthNotice(notice);
+    }
   };
 
   if (!token) {
-    return <AuthForm onSuccess={handleLoginSuccess} />;
+    return <AuthForm onSuccess={handleLoginSuccess} initialError={authNotice} />;
   }
 
   async function addJob(newJob: JobApplication) {
@@ -70,7 +80,11 @@ function App() {
       const { id, ...jobData } = newJob;
       const createdJob = await jobsApi.createJob(jobData);
       setJobs((currentJobs) => [...currentJobs, createdJob]);
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.message === "SESSION_EXPIRED") {
+        handleLogout("Tu sesión ha expirado por inactividad. Por favor, vuelve a iniciar sesión.");
+        return;
+      }
       setError("No se pudo crear la postulación.");
     }
   }
@@ -79,7 +93,11 @@ function App() {
     try {
       await jobsApi.deleteJob(id);
       setJobs((currentJobs) => currentJobs.filter((job) => job.id !== id));
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.message === "SESSION_EXPIRED") {
+        handleLogout("Tu sesión ha expirado por inactividad. Por favor, vuelve a iniciar sesión.");
+        return;
+      }
       setError("No se pudo eliminar la postulación.");
     }
   }
@@ -91,7 +109,11 @@ function App() {
         currentJobs.map((job) => (job.id === savedJob.id ? savedJob : job)),
       );
       setEditingJob(null);
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.message === "SESSION_EXPIRED") {
+        handleLogout("Tu sesión ha expirado por inactividad. Por favor, vuelve a iniciar sesión.");
+        return;
+      }
       setError("No se pudo actualizar la postulación.");
     }
   }
