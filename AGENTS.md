@@ -55,8 +55,12 @@ velocidad de entrega.
 
 ## Estado actual
 
+Skills instaladas (.agents/skills/):
+- frontend-design: guía de diseño visual distintivo (layout, tipografía, paleta de colores y motion) para evitar interfaces genéricas en React/Tailwind.
+- explain-code: explicación pedagógica bajo demanda de código existente con ejemplos, flujo paso a paso y pregunta de comprensión (MoureDev).
+
 Backend: registro y login con JWT funcionando. Todos los endpoints de /jobs (GET, POST, PUT, DELETE) protegidos con autenticación JWT y filtrados por el user_id del usuario autenticado. Suite de pruebas backend con Pytest (8/8 pasadas en verde con SQLite en memoria) cubriendo /register, /login, JWT y aislamiento multi-tenancy.
 
-Frontend: pantallas de Login y Registro (AuthForm) conectadas con JWT, persistencia de token en localStorage y barra superior con usuario/logout.
+Frontend: pantallas de Login y Registro (AuthForm) conectadas con JWT, persistencia de token en localStorage, barra superior con usuario/logout, auto-detección de enlaces en notas y manejo de 401 por inactividad.
 
 Tests: los 24 tests E2E de Playwright (Chromium, Firefox, WebKit) y los 8 tests backend con Pytest pasando 100% en verde integrados en GitHub Actions CI (ci.yml).
