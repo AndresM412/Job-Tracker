@@ -67,8 +67,10 @@ function App() {
     setToken(null);
     setUserEmail(null);
     setJobs([]);
-    if (notice) {
+    if (typeof notice === "string") {
       setAuthNotice(notice);
+    } else {
+      setAuthNotice(null);
     }
   };
 
@@ -160,7 +162,7 @@ function App() {
           </div>
 
           <button
-            onClick={handleLogout}
+            onClick={() => handleLogout()}
             className="btn-secondary text-xs py-1.5 px-3"
           >
             Cerrar Sesión
