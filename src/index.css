@@ -5,11 +5,11 @@
   --font-body: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --color-bg: #0f0e17;
-  --color-surface: #1a1825;
-  --color-border: #2e2a3d;
-  --color-text: #e9e6f0;
-  --color-muted: #9691a8;
+  --color-bg: #09090b;
+  --color-surface: #121118;
+  --color-border: #272438;
+  --color-text: #f4f4f6;
+  --color-muted: #8e8a9f;
 
   --color-applied: #f5a65b;
   --color-interview: #8b7fe8;
@@ -17,14 +17,30 @@
   --color-rejected: #e8607c;
 }
 
+:root {
+  --bg-app: #09090b;
+  --bg-surface: #121118;
+  --bg-surface-hover: #191724;
+  --border-app: #272438;
+  --text-main: #f4f4f6;
+  --text-muted: #8e8a9f;
+
+  --status-applied: #f5a65b;
+  --status-interview: #8b7fe8;
+  --status-offer: #5fd9a8;
+  --status-rejected: #e8607c;
+}
+
 body {
   background-color: var(--color-bg);
+  color: var(--color-text);
   font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
 }
 
 @layer components {
   .input-field {
-    @apply bg-bg border border-border rounded-md px-3 py-2 text-sm text-text placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-interview;
+    @apply bg-bg border border-border rounded-lg px-3.5 py-2.5 text-sm text-text placeholder:text-muted/60 focus:outline-none focus:border-interview focus:ring-1 focus:ring-interview/40 transition-all;
   }
   
   input[type="date"]::-webkit-calendar-picker-indicator {
@@ -33,18 +49,39 @@ body {
   }
 
   .btn-edit {
-    @apply text-xs px-3 py-1.5 rounded-md border border-border transition-colors text-text hover:bg-border cursor-pointer;
+    @apply text-xs font-medium px-3 py-1.5 rounded-md border border-border transition-all text-text hover:bg-border/60 hover:text-white cursor-pointer active:scale-95;
   }
 
   .btn-delete {
-    @apply text-xs px-3 py-1.5 rounded-md border border-border transition-colors text-rejected hover:bg-rejected/10 cursor-pointer;
+    @apply text-xs font-medium px-3 py-1.5 rounded-md border border-rejected/30 transition-all text-rejected/90 hover:bg-rejected/15 hover:border-rejected/60 cursor-pointer active:scale-95;
   }
 
   .btn-submit {
-    @apply bg-interview text-bg text-sm font-medium px-4 py-2 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition-all cursor-pointer;
+    @apply bg-interview text-bg text-sm font-semibold px-5 py-2.5 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-115 transition-all shadow-lg shadow-interview/20 cursor-pointer active:scale-95;
   }
 
   .btn-secondary {
-    @apply border border-border text-text text-sm font-medium px-4 py-2 rounded-md hover:bg-border transition-all cursor-pointer;
+    @apply border border-border text-text text-sm font-medium px-4 py-2 rounded-lg hover:bg-border/50 transition-all cursor-pointer active:scale-95;
+  }
+
+  /* Micro-glow interactive card effects */
+  .card-glow-applied:hover {
+    box-shadow: 0 0 20px -3px rgba(245, 166, 91, 0.15), 0 0 8px -2px rgba(245, 166, 91, 0.1);
+    border-color: rgba(245, 166, 91, 0.4);
+  }
+
+  .card-glow-interview:hover {
+    box-shadow: 0 0 20px -3px rgba(139, 127, 232, 0.18), 0 0 8px -2px rgba(139, 127, 232, 0.12);
+    border-color: rgba(139, 127, 232, 0.45);
+  }
+
+  .card-glow-offer:hover {
+    box-shadow: 0 0 20px -3px rgba(95, 217, 168, 0.18), 0 0 8px -2px rgba(95, 217, 168, 0.12);
+    border-color: rgba(95, 217, 168, 0.45);
+  }
+
+  .card-glow-rejected:hover {
+    box-shadow: 0 0 20px -3px rgba(232, 96, 124, 0.15), 0 0 8px -2px rgba(232, 96, 124, 0.1);
+    border-color: rgba(232, 96, 124, 0.4);
   }
 }

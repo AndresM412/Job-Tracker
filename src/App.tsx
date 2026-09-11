@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import JobList from "./components/JobList";
 import { type JobApplication } from "./types/job";
 import JobForm from "./components/JobForm";
+import StatsBanner from "./components/StatsBanner";
 import FilterBar, { type FilterValue } from "./components/filters/FilterBar";
 import SearchBar from "./components/filters/SearchBar";
 import SortControl, { type SortOrder } from "./components/filters/SortControl";
@@ -172,6 +173,8 @@ function App() {
           {error}
         </div>
       )}
+
+      <StatsBanner jobs={jobs} />
 
       <JobForm
         onAddJob={addJob}

@@ -11,6 +11,13 @@ const statusColor: Record<string, string> = {
   Rejected: "var(--color-rejected)",
 };
 
+const statusGlowClass: Record<string, string> = {
+  Applied: "card-glow-applied",
+  Interview: "card-glow-interview",
+  Offer: "card-glow-offer",
+  Rejected: "card-glow-rejected",
+};
+
 type JobItemProps = {
   job: JobApplication;
   onDeleteJob: (id: string) => void;
@@ -24,11 +31,12 @@ function JobItem({ job, onDeleteJob, onEditJob }: JobItemProps) {
       <div onClick={() => setIsModalOpen(true)} className="cursor-pointer h-full">
         <Card
           accentColor={statusColor[job.status]}
+          glowClass={statusGlowClass[job.status]}
           data-testid={`job-card-${job.company}`}
         >
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <h2 className="font-display font-medium text-lg text-text wrap-break-word">
+              <h2 className="font-display font-semibold text-lg text-text wrap-break-word">
                 {job.company}
               </h2>
               <p className="text-muted text-sm truncate">{job.position}</p>
@@ -36,7 +44,7 @@ function JobItem({ job, onDeleteJob, onEditJob }: JobItemProps) {
             <StatusBadge status={job.status} />
           </div>
 
-          <p className="font-mono text-xs text-muted mt-2">
+          <p className="font-mono text-xs text-muted/80 mt-2">
             {job.applicationDate}
           </p>
 
