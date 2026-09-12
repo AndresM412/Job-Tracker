@@ -61,6 +61,6 @@ Skills instaladas (.agents/skills/):
 
 Backend: registro y login con JWT funcionando. Todos los endpoints de /jobs (GET, POST, PUT, DELETE) protegidos con autenticación JWT y filtrados por el user_id del usuario autenticado. Suite de pruebas backend con Pytest (8/8 pasadas en verde con SQLite en memoria) cubriendo /register, /login, JWT y aislamiento multi-tenancy.
 
-Frontend: pantallas de Login y Registro (AuthForm) conectadas con JWT, persistencia de token en localStorage, barra superior con usuario/logout, auto-detección de enlaces en notas y manejo de 401 por inactividad.
+Frontend: pantallas de Login y Registro (AuthForm) conectadas con JWT, persistencia de token en localStorage, barra superior con usuario/logout, auto-detección de enlaces en notas y manejo de 401 por inactividad. Rediseño visual "Control Room v2" aplicado con banner de métricas KPI, badges en píldoras con indicador luminoso y resplandor (glow) al pasar el cursor.
 
 Tests: los 24 tests E2E de Playwright (Chromium, Firefox, WebKit) y los 8 tests backend con Pytest pasando 100% en verde integrados en GitHub Actions CI (ci.yml).
