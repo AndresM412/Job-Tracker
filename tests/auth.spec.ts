@@ -89,4 +89,26 @@ test.describe('Flujos de Autenticación E2E', () => {
     const token = await page.evaluate(() => localStorage.getItem('job_tracker_token'));
     expect(token).toBeNull();
   });
+
+  test('redirige a login y muestra aviso cuando el token expira o es inválido (401)', async ({ page }) => {
+    // 1. Inyectar un token corrupto o expirado antes de navegar
+    await page.addInitScript(() => {
+      window.localStorage.setItem('job_tracker_token', 'token_invalido_expirado_123');
+      window.localStorage.setItem('job_tracker_user_email', 'expirado@example.com');
+    });
+
+    // 2. Navegar a la raíz
+    await page.goto('/');
+
+    // 3. ASSERT: Debe expulsar al usuario y mostrar el mensaje de sesión expirada
+    await expect(
+      page.getByText('Tu sesión ha expirado por inactividad. Por favor, vuelve a iniciar sesión.')
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Iniciar Sesión' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Cerrar Sesión' })).not.toBeVisible();
+
+    // 4. ASSERT: El token inválido debe haber sido purgado de localStorage
+    const token = await page.evaluate(() => localStorage.getItem('job_tracker_token'));
+    expect(token).toBeNull();
+  });
 });

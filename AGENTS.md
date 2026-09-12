@@ -48,19 +48,14 @@ velocidad de entrega.
 - Cambios en dependencias de Python u otras herramientas deben reflejarse
   siempre en `requirements.txt` (`pip freeze > requirements.txt`) antes
   de hacer commit, para no romper CI.
-- Nunca perder de vista nullable=True temporal en `user_id` de
-  `job_applications` — es un TODO pendiente que debe volver a
-  `nullable=False` una vez la autenticación esté completamente conectada
-  en todos los endpoints de /jobs.
-
 ## Estado actual
 
 Skills instaladas (.agents/skills/):
 - frontend-design: guía de diseño visual distintivo (layout, tipografía, paleta de colores y motion) para evitar interfaces genéricas en React/Tailwind.
 - explain-code: explicación pedagógica bajo demanda de código existente con ejemplos, flujo paso a paso y pregunta de comprensión (MoureDev).
 
-Backend: registro y login con JWT funcionando. Todos los endpoints de /jobs (GET, POST, PUT, DELETE) protegidos con autenticación JWT y filtrados por el user_id del usuario autenticado. Suite de pruebas backend con Pytest (8/8 pasadas en verde con SQLite en memoria) cubriendo /register, /login, JWT y aislamiento multi-tenancy.
+Backend: registro y login con JWT funcionando. Todos los endpoints de /jobs (GET, POST, PUT, DELETE) protegidos con autenticación JWT y filtrados por el user_id del usuario autenticado. Columna user_id con restricción NOT NULL (nullable=False). Suite de pruebas backend con Pytest (8/8 pasadas en verde con SQLite en memoria) cubriendo /register, /login, JWT y aislamiento multi-tenancy.
 
 Frontend: pantallas de Login y Registro (AuthForm) conectadas con JWT, persistencia de token en localStorage, barra superior con usuario/logout, auto-detección de enlaces en notas y manejo de 401 por inactividad. Rediseño visual "Control Room v2" aplicado con banner de métricas KPI, badges en píldoras con indicador luminoso y resplandor (glow) al pasar el cursor.
 
-Tests: los 36 tests E2E de Playwright (24 de postulaciones + 12 de autenticación en Chromium, Firefox y WebKit) y los 8 tests backend con Pytest pasando 100% en verde integrados en GitHub Actions CI (ci.yml).
+Tests: los 42 tests E2E de Playwright (27 de postulaciones incluyendo ordenamiento + 15 de autenticación incluyendo expiración de sesión en Chromium, Firefox y WebKit) y los 8 tests backend con Pytest pasando 100% en verde integrados en GitHub Actions CI (ci.yml).
