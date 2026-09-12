@@ -22,17 +22,20 @@ test('el usuario puede editar una postulación existente', async ({ page }) => {
   // ASSERT 1: el form debe rellenarse con los datos actuales
   await expect(page.getByPlaceholder('Company', { exact: true })).toHaveValue('Netflix');
   await expect(page.getByPlaceholder('Position', { exact: true })).toHaveValue('QA Engineer');
+  await expect(page.locator('select').first()).toHaveValue('Applied');
 
   // El botón debe cambiar de texto en modo edición
   await expect(page.getByRole('button', { name: 'Save Changes' })).toBeVisible();
 
-  // ACT 2: cambiamos el puesto y guardamos
+  // ACT 2: cambiamos el puesto y el estado, luego guardamos
   await page.getByPlaceholder('Position', { exact: true }).fill('Senior QA Engineer');
+  await page.locator('select').first().selectOption('Interview');
   await page.getByRole('button', { name: 'Save Changes' }).click();
 
   // ASSERT 2: el cambio debe reflejarse, y el dato viejo ya no debe existir
   await expect(page.getByText('Senior QA Engineer')).toBeVisible();
   await expect(page.getByText('QA Engineer', { exact: true })).not.toBeVisible();
+  await expect(netflixCard.getByTestId('status-badge')).toHaveText('Interview');
 
   // Y el botón debe volver a decir "Add Job" (salimos del modo edición)
   await expect(page.getByRole('button', { name: 'Add Job' })).toBeVisible();

@@ -10,6 +10,8 @@ function SortControl({ value, onChange }: SortControlProps) {
     <select
       value={value}
       onChange={(e) => onChange(e.target.value as SortOrder)}
+      aria-label="Sort by"
+      data-testid="sort-control"
       className="input-field"
     >
       <option value="newest">Newest first</option>
