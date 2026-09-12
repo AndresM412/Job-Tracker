@@ -43,6 +43,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
 
   return (
     <span
+      data-testid="status-badge"
       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all"
       style={{
         backgroundColor: config.bg,
