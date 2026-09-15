@@ -1,24 +1,28 @@
 import { test, expect } from '@playwright/test';
 import { setupAuthenticatedSession } from './helpers';
+import { DashboardPage } from './pages/DashboardPage';
 
 test.beforeEach(async ({ page, request }) => {
   await setupAuthenticatedSession(page, request);
-  await page.goto('/');
 });
 
 test('el usuario puede eliminar una postulación', async ({ page }) => {
-  // ARRANGE: primero creamos un job para poder borrarlo después
-  await page.getByPlaceholder('Company', { exact: true }).fill('Microsoft');
-  await page.getByPlaceholder('Position', { exact: true }).fill('Backend Developer');
-  await page.locator('input[type="date"]').fill('2026-08-01');
-  await page.getByRole('button', { name: 'Add Job' }).click();
+  const dashboard = new DashboardPage(page);
+  await dashboard.goto();
 
-  // Confirmamos que sí se creó, antes de intentar borrarlo
-  await expect(page.getByText('Microsoft')).toBeVisible();
+  // ARRANGE: creamos un job a través del Page Object
+  await dashboard.addJob({
+    company: 'Microsoft',
+    position: 'Backend Developer',
+    date: '2026-08-01',
+  });
 
-  // ACT: hacemos clic en Delete
-  await page.getByRole('button', { name: 'Delete' }).click();
+  const microsoftCard = dashboard.getJobCard('Microsoft');
+  await expect(microsoftCard).toBeVisible();
+
+  // ACT: eliminamos la postulación usando el método encapsulado del Page Object
+  await dashboard.deleteJob('Microsoft');
 
   // ASSERT: la card ya no debe existir
-  await expect(page.getByText('Microsoft')).not.toBeVisible();
+  await expect(microsoftCard).not.toBeVisible();
 });

@@ -10,7 +10,7 @@ type JobFormProps = {
 function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
   const [company, setCompany] = useState("");
   const [position, setPosition] = useState("");
-  const [status, setStatus] = useState<JobApplication["status"]>("Applied");
+  const [status, setStatus] = useState<JobApplication["status"] | "">("");
   const [applicationDate, setApplicationDate] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -37,7 +37,7 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
         id: editingJob.id,
         company,
         position,
-        status,
+        status: status as JobApplication["status"],
         applicationDate,
         notes: notes.trim() === "" ? undefined : notes,
       };
@@ -48,7 +48,7 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
         id: Date.now().toString(),
         company,
         position,
-        status,
+        status: status as JobApplication["status"],
         applicationDate,
         notes: notes.trim() === "" ? undefined : notes,
       };
@@ -57,7 +57,7 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
 
     setCompany("");
     setPosition("");
-    setStatus("Applied");
+    setStatus("");
     setApplicationDate("");
     setNotes("");
   }
@@ -83,9 +83,12 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
 
         <select
           value={status}
-          onChange={(e) => setStatus(e.target.value as JobStatus)}
-          className="input-field"
+          onChange={(e) => setStatus(e.target.value)}
+          className={`input-field ${status === "" ? "text-muted" : "text-text"}`}
         >
+          <option value="" disabled hidden>
+            Select Status...
+          </option>
           <option value="Applied">Applied</option>
           <option value="Interview">Interview</option>
           <option value="Offer">Offer</option>
