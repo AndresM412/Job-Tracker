@@ -1,42 +1,43 @@
 import { test, expect } from '@playwright/test';
 import { setupAuthenticatedSession } from './helpers';
+import { DashboardPage } from './pages/DashboardPage';
 
 test.beforeEach(async ({ page, request }) => {
   await setupAuthenticatedSession(page, request);
-  await page.goto('/');
 });
 
 test('el usuario puede editar una postulación existente', async ({ page }) => {
-  // ARRANGE: creamos un job para después editarlo
-  await page.getByPlaceholder('Company', { exact: true }).fill('Netflix');
-  await page.getByPlaceholder('Position', { exact: true }).fill('QA Engineer');
-  await page.locator('input[type="date"]').fill('2026-08-01');
-  await page.getByRole('button', { name: 'Add Job' }).click();
+  const dashboard = new DashboardPage(page);
+  await dashboard.goto();
 
-  await expect(page.getByText('Netflix')).toBeVisible();
+  // 1. ARRANGE: Creamos el job inicial con status 'Applied' explícito
+  await dashboard.addJob({
+    company: 'Netflix',
+    position: 'QA Engineer',
+    status: 'Applied',
+    date: '2026-08-01',
+  });
 
-  // ACT 1: hacemos clic en Edit dentro de la card de Netflix
-  const netflixCard = page.getByTestId('job-card-Netflix');
-  await netflixCard.getByRole('button', { name: 'Edit' }).click();
+  const netflixCard = dashboard.getJobCard('Netflix');
+  await expect(netflixCard).toBeVisible();
 
-  // ASSERT 1: el form debe rellenarse con los datos actuales
-  await expect(page.getByPlaceholder('Company', { exact: true })).toHaveValue('Netflix');
-  await expect(page.getByPlaceholder('Position', { exact: true })).toHaveValue('QA Engineer');
-  await expect(page.locator('select').first()).toHaveValue('Applied');
+  // 2. ACT 1: Hacemos clic en Edit usando el método del Page Object
+  await dashboard.clickEditJob('Netflix');
 
-  // El botón debe cambiar de texto en modo edición
-  await expect(page.getByRole('button', { name: 'Save Changes' })).toBeVisible();
+  // 3. ASSERT 1: El form se rellena con los datos actuales
+  await expect(dashboard.companyInput).toHaveValue('Netflix');
+  await expect(dashboard.positionInput).toHaveValue('QA Engineer');
+  await expect(dashboard.statusSelect).toHaveValue('Applied');
+  await expect(dashboard.saveChangesButton).toBeVisible();
 
-  // ACT 2: cambiamos el puesto y el estado, luego guardamos
-  await page.getByPlaceholder('Position', { exact: true }).fill('Senior QA Engineer');
-  await page.locator('select').first().selectOption('Interview');
-  await page.getByRole('button', { name: 'Save Changes' }).click();
+  // 4. ACT 2: Cambiamos puesto y estado a 'Interview', luego guardamos
+  await dashboard.positionInput.fill('Senior QA Engineer');
+  await dashboard.statusSelect.selectOption('Interview');
+  await dashboard.saveChangesButton.click();
 
-  // ASSERT 2: el cambio debe reflejarse, y el dato viejo ya no debe existir
-  await expect(page.getByText('Senior QA Engineer')).toBeVisible();
-  await expect(page.getByText('QA Engineer', { exact: true })).not.toBeVisible();
-  await expect(netflixCard.getByTestId('status-badge')).toHaveText('Interview');
-
-  // Y el botón debe volver a decir "Add Job" (salimos del modo edición)
-  await expect(page.getByRole('button', { name: 'Add Job' })).toBeVisible();
+  // 5. ASSERT 2: El cambio se refleja en la card
+  await expect(netflixCard.getByText('Senior QA Engineer')).toBeVisible();
+  await expect(netflixCard.getByText('QA Engineer', { exact: true })).not.toBeVisible();
+  await expect(dashboard.getStatusBadge(netflixCard)).toHaveText('Interview');
+  await expect(dashboard.addJobButton).toBeVisible();
 });

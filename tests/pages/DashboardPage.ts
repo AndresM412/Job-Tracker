@@ -73,6 +73,11 @@ export class DashboardPage {
     await card.getByRole('button', { name: 'Delete' }).click();
   }
 
+  async clickEditJob(company: string) {
+    const card = this.getJobCard(company);
+    await card.getByRole('button', { name: 'Edit' }).click();
+  }
+
   getStatusBadge(card: Locator): Locator {
     return card.getByTestId('status-badge');
   }

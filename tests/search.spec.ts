@@ -1,66 +1,55 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { setupAuthenticatedSession } from './helpers';
+import { DashboardPage } from './pages/DashboardPage';
 
 test.beforeEach(async ({ page, request }) => {
   await setupAuthenticatedSession(page, request);
-  await page.goto('/');
 });
 
-async function addJob(page: Page, company: string, position: string, date: string) {
-  await page.getByPlaceholder('Company', { exact: true }).fill(company);
-  await page.getByPlaceholder('Position', { exact: true }).fill(position);
-  await page.locator('input[type="date"]').fill(date);
-  await expect(page.getByRole('button', { name: 'Add Job' })).toBeEnabled();
-  await page.getByRole('button', { name: 'Add Job' }).click();
-  await expect(page.getByTestId(`job-card-${company}`)).toBeVisible();
-}
-
 test('el usuario puede buscar postulaciones por texto', async ({ page }) => {
-  // ARRANGE
+  const dashboard = new DashboardPage(page);
+  await dashboard.goto();
+
+  // 1. ARRANGE: Creamos 3 jobs con fechas y estados específicos
   const jobs = [
-    { company: 'Microsoft', position: 'Backend Developer', date: '2026-08-01' },
-    { company: 'Google', position: 'Frontend Developer', date: '2026-08-02' },
-    { company: 'Amazon', position: 'Frontend Engineer', date: '2026-08-03' },
+    { company: 'Microsoft', position: 'Backend Developer', status: 'Applied', date: '2026-08-01' },
+    { company: 'Google', position: 'Frontend Developer', status: 'Interview', date: '2026-08-02' },
+    { company: 'Amazon', position: 'Frontend Engineer', status: 'Offer', date: '2026-08-03' },
   ];
 
   for (const job of jobs) {
-    await addJob(page, job.company, job.position, job.date);
+    await dashboard.addJob(job);
+    await expect(dashboard.getJobCard(job.company)).toBeVisible();
   }
 
-  for (const job of jobs) {
-    await expect(page.getByTestId(`job-card-${job.company}`)).toBeVisible();
-  }
-
-  // Calculamos qué jobs deberían coincidir con la búsqueda, a partir de los datos mismos
+  // 2. ACT: Buscamos "Frontend" usando el Page Object
   const searchQuery = 'Frontend';
-  const matchingJobs = jobs.filter((job) =>
-    job.position.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  const nonMatchingJobs = jobs.filter((job) =>
-    !job.position.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  await dashboard.search(searchQuery);
 
-  // ACT
-  await page.getByPlaceholder('Search by company, position, or status...').fill(searchQuery);
+  // 3. ASSERT: Los que coinciden (Google y Amazon) deben verse
+  await expect(dashboard.getJobCard('Google')).toBeVisible();
+  await expect(dashboard.getJobCard('Amazon')).toBeVisible();
 
-  // ASSERT: los que coinciden deben verse
-  for (const job of matchingJobs) {
-    await expect(page.getByTestId(`job-card-${job.company}`)).toBeVisible();
-  }
-
-  // ASSERT: los que no coinciden, no deben verse
-  for (const job of nonMatchingJobs) {
-    await expect(page.getByTestId(`job-card-${job.company}`)).not.toBeVisible();
-  }
+  // Y el que no coincide (Microsoft) no debe verse
+  await expect(dashboard.getJobCard('Microsoft')).not.toBeVisible();
 });
 
 test('la búsqueda sin coincidencias muestra el mensaje de vacío', async ({ page }) => {
-  await addJob(page, 'Microsoft', 'Backend Developer', '2026-08-01');
+  const dashboard = new DashboardPage(page);
+  await dashboard.goto();
 
-  // ACT: buscamos algo que sabemos que no existe en ningún campo
-  await page.getByPlaceholder('Search by company, position, or status...').fill('Netflix');
+  // ARRANGE: Creamos un job
+  await dashboard.addJob({
+    company: 'Microsoft',
+    position: 'Backend Developer',
+    status: 'Applied',
+    date: '2026-08-01',
+  });
 
-  // ASSERT
-  await expect(page.getByTestId('job-card-Microsoft')).not.toBeVisible();
+  // ACT: Buscamos un texto que sabemos que no existe
+  await dashboard.search('Netflix');
+
+  // ASSERT: La card desaparece y se muestra el mensaje de lista vacía
+  await expect(dashboard.getJobCard('Microsoft')).not.toBeVisible();
   await expect(page.getByText('No applications match this filter.')).toBeVisible();
 });

@@ -1,30 +1,17 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import { setupAuthenticatedSession } from "./helpers";
+import { DashboardPage } from "./pages/DashboardPage";
 
 test.beforeEach(async ({ page, request }) => {
   await setupAuthenticatedSession(page, request);
-  await page.goto("/");
 });
-
-async function addJob(
-  page: Page,
-  company: string,
-  position: string,
-  status: string,
-  date: string,
-) {
-  await page.getByPlaceholder("Company", { exact: true }).fill(company);
-  await page.getByPlaceholder("Position", { exact: true }).fill(position);
-  await page.locator("select").first().selectOption(status);
-  await page.locator('input[type="date"]').fill(date);
-  await expect(page.getByRole("button", { name: "Add Job" })).toBeEnabled();
-  await page.getByRole("button", { name: "Add Job" }).click();
-  await expect(page.getByTestId(`job-card-${company}`)).toBeVisible();
-}
 
 test("el filtro muestra TODAS las postulaciones que coinciden con el status", async ({
   page,
 }) => {
+  const dashboard = new DashboardPage(page);
+  await dashboard.goto();
+
   // ARRANGE: la lista de jobs es la única fuente de verdad
   const jobs = [
     {
@@ -54,12 +41,8 @@ test("el filtro muestra TODAS las postulaciones que coinciden con el status", as
   ];
 
   for (const job of jobs) {
-    await addJob(page, job.company, job.position, job.status, job.date);
-  }
-
-  // Confirmamos que todos existen antes de filtrar
-  for (const job of jobs) {
-    await expect(page.getByTestId(`job-card-${job.company}`)).toBeVisible();
+    await dashboard.addJob(job);
+    await expect(dashboard.getJobCard(job.company)).toBeVisible();
   }
 
   // Calculamos cuántos jobs deberían coincidir con "Applied", a partir del array
@@ -68,8 +51,8 @@ test("el filtro muestra TODAS las postulaciones que coinciden con el status", as
     (job) => job.status === statusToFilter,
   ).length;
 
-  // ACT: filtramos
-  await page.getByRole("button", { name: statusToFilter, exact: true }).click();
+  // ACT: filtramos usando el Page Object
+  await dashboard.filterByStatus(statusToFilter);
 
   // ASSERT: el número de badges de estado visibles debe coincidir con lo que calculamos
   const appliedMessages = page.getByTestId("status-badge").filter({ hasText: "Applied" });
@@ -78,31 +61,49 @@ test("el filtro muestra TODAS las postulaciones que coinciden con el status", as
   // Verificamos también que sean justo los correctos (no otros por casualidad)
   const matchingJobs = jobs.filter((job) => job.status === statusToFilter);
   for (const job of matchingJobs) {
-    await expect(page.getByTestId(`job-card-${job.company}`)).toBeVisible();
+    await expect(dashboard.getJobCard(job.company)).toBeVisible();
   }
 
   const nonMatchingJobs = jobs.filter((job) => job.status !== statusToFilter);
   for (const job of nonMatchingJobs) {
-    await expect(page.getByTestId(`job-card-${job.company}`)).not.toBeVisible();
+    await expect(dashboard.getJobCard(job.company)).not.toBeVisible();
   }
 });
 
 test('el filtro "All" muestra todas las postulaciones sin importar el status', async ({
   page,
 }) => {
-  await addJob(page, "Microsoft", "Backend Developer", "Applied", "2026-08-01");
-  await addJob(page, "Google", "Frontend Developer", "Applied", "2026-08-02");
-  await addJob(page, "Amazon", "DevOps Engineer", "Interview", "2026-08-03");
+  const dashboard = new DashboardPage(page);
+  await dashboard.goto();
+
+  await dashboard.addJob({
+    company: "Microsoft",
+    position: "Backend Developer",
+    status: "Applied",
+    date: "2026-08-01",
+  });
+  await dashboard.addJob({
+    company: "Google",
+    position: "Frontend Developer",
+    status: "Applied",
+    date: "2026-08-02",
+  });
+  await dashboard.addJob({
+    company: "Amazon",
+    position: "DevOps Engineer",
+    status: "Interview",
+    date: "2026-08-03",
+  });
 
   // Filtramos primero por algo específico
-  await page.getByRole("button", { name: "Interview", exact: true }).click();
-  await expect(page.getByTestId("job-card-Microsoft")).not.toBeVisible();
+  await dashboard.filterByStatus("Interview");
+  await expect(dashboard.getJobCard("Microsoft")).not.toBeVisible();
 
-  // ACT: volvemos a "All"
-  await page.getByRole("button", { name: "All", exact: true }).click();
+  // ACT: volvemos a "All" a través del Page Object
+  await dashboard.filterByStatus("All");
 
   // ASSERT: los 3 vuelven a verse
-  await expect(page.getByTestId("job-card-Microsoft")).toBeVisible();
-  await expect(page.getByTestId("job-card-Google")).toBeVisible();
-  await expect(page.getByTestId("job-card-Amazon")).toBeVisible();
+  await expect(dashboard.getJobCard("Microsoft")).toBeVisible();
+  await expect(dashboard.getJobCard("Google")).toBeVisible();
+  await expect(dashboard.getJobCard("Amazon")).toBeVisible();
 });

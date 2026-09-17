@@ -1,39 +1,47 @@
 import { test, expect } from "@playwright/test";
-import { setupAuthenticatedSession } from './helpers';
+import { setupAuthenticatedSession } from "./helpers";
+import { DashboardPage } from "./pages/DashboardPage";
 
 test.beforeEach(async ({ page, request }) => {
   await setupAuthenticatedSession(page, request);
-  await page.goto('/');
 });
 
 test("el usuario puede eliminar una postulación específica entre varias", async ({
   page,
 }) => {
-  // ARRANGE: creamos 3 jobs distintos
+  const dashboard = new DashboardPage(page);
+  await dashboard.goto();
+
   const jobs = [
-    { company: "Microsoft", position: "Backend Developer" },
-    { company: "Google", position: "Frontend Developer" },
-    { company: "Amazon", position: "DevOps Engineer" },
+    { company: "Microsoft", position: "Backend Developer", status: "Applied", date: "2026-08-01" },
+    { company: "Google", position: "Frontend Developer", status: "Interview", date: "2026-08-02" },
+    { company: "Amazon", position: "DevOps Engineer", status: "Offer", date: "2026-08-03" },
   ];
 
   for (const job of jobs) {
-    await page.getByPlaceholder("Company", { exact: true }).fill(job.company);
-    await page.getByPlaceholder("Position", { exact: true }).fill(job.position);
-    await page.locator('input[type="date"]').fill("2026-08-01");
-    await page.getByRole("button", { name: "Add Job" }).click();
+    await dashboard.addJob({
+      company: job.company,
+      position: job.position,
+      status: job.status,
+      date: job.date,
+    });
   }
 
-  // Confirmamos que los 3 existen
-  await expect(page.getByText("Microsoft")).toBeVisible();
-  await expect(page.getByText("Google")).toBeVisible();
-  await expect(page.getByText("Amazon")).toBeVisible();
+  // Confirmamos que los 3 existen y que Google tiene su badge correcto
+  const googleCard = dashboard.getJobCard("Google");
+  const microsoftCard = dashboard.getJobCard("Microsoft");
+  const amazonCard = dashboard.getJobCard("Amazon");
 
-  // ACT: buscamos SOLO la card que contiene "Google", y dentro de ella, su botón Delete
-  const googleCard = page.getByTestId("job-card-Google");
-  await googleCard.getByRole("button", { name: "Delete" }).click();
+  await expect(microsoftCard).toBeVisible();
+  await expect(googleCard).toBeVisible();
+  await expect(amazonCard).toBeVisible();
+  await expect(dashboard.getStatusBadge(googleCard)).toHaveText("Interview");
 
-  // ASSERT: Google desapareció, pero los otros dos siguen ahí
-  await expect(page.getByText("Google", { exact: true })).not.toBeVisible();
-  await expect(page.getByText("Microsoft", { exact: true })).toBeVisible();
-  await expect(page.getByText("Amazon", { exact: true })).toBeVisible();
+  // ACT: eliminamos SOLO Google a través del Page Object
+  await dashboard.deleteJob("Google");
+
+  // ASSERT: Google desapareció, pero Microsoft y Amazon siguen ahí
+  await expect(googleCard).not.toBeVisible();
+  await expect(microsoftCard).toBeVisible();
+  await expect(amazonCard).toBeVisible();
 });
