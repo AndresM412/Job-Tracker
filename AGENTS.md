@@ -58,4 +58,4 @@ Backend: registro y login con JWT funcionando. Todos los endpoints de /jobs (GET
 
 Frontend: pantallas de Login y Registro (AuthForm) conectadas con JWT, persistencia de token en localStorage, barra superior con usuario/logout, auto-detección de enlaces en notas y manejo de 401 por inactividad. Rediseño visual "Control Room v2" aplicado con banner de métricas KPI, badges en píldoras con indicador luminoso y resplandor (glow) al pasar el cursor.
 
-Tests: los 42 tests E2E de Playwright (27 de postulaciones incluyendo ordenamiento + 15 de autenticación incluyendo expiración de sesión en Chromium, Firefox y WebKit) y los 8 tests backend con Pytest pasando 100% en verde integrados en GitHub Actions CI (ci.yml).
+Tests: los 42 tests E2E de Playwright (27 de postulaciones + 15 de autenticación en Chromium, Firefox y WebKit) migrados en su totalidad al patrón Page Object Model (POM) mediante AuthPage y DashboardPage, y los 8 tests backend con Pytest pasando 100% en verde integrados en GitHub Actions CI (ci.yml).
