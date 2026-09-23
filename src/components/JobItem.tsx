@@ -20,11 +20,11 @@ const statusGlowClass: Record<string, string> = {
 
 type JobItemProps = {
   job: JobApplication;
-  onDeleteJob: (id: string) => void;
+  onRequestDelete: (job: JobApplication) => void;
   onEditJob: (job: JobApplication) => void;
 };
 
-function JobItem({ job, onDeleteJob, onEditJob }: JobItemProps) {
+function JobItem({ job, onRequestDelete, onEditJob }: JobItemProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <>
@@ -61,7 +61,7 @@ function JobItem({ job, onDeleteJob, onEditJob }: JobItemProps) {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onDeleteJob(job.id);
+                onRequestDelete(job);
               }}
               className="btn-delete"
             >

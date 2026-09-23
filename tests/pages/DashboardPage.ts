@@ -24,6 +24,13 @@ export class DashboardPage {
   readonly searchInput: Locator;
   readonly sortSelect: Locator;
 
+  // Modal de Confirmación de Eliminación
+  readonly deleteModal: Locator;
+  readonly confirmDeleteButton: Locator;
+  readonly cancelDeleteButton: Locator;
+  readonly deleteModalTitle: Locator;
+  readonly deleteModalBackdrop: Locator;
+
   // 3. Locators de Sesión
   readonly logoutButton: Locator;
 
@@ -42,6 +49,13 @@ export class DashboardPage {
     // Controles de Filtrado y Ordenamiento
     this.searchInput = page.getByPlaceholder('Search by company, position, or status...');
     this.sortSelect = page.getByTestId('sort-control');
+
+    // Modal de Confirmación de Eliminación
+    this.deleteModal = page.getByRole('dialog');
+    this.confirmDeleteButton = page.getByTestId('confirm-delete-btn');
+    this.cancelDeleteButton = page.getByTestId('cancel-delete-btn');
+    this.deleteModalTitle = page.locator('#confirm-delete-title');
+    this.deleteModalBackdrop = page.getByTestId('confirm-delete-modal-backdrop');
 
     // Sesión
     this.logoutButton = page.getByRole('button', { name: 'Cerrar Sesión' });
@@ -68,9 +82,22 @@ export class DashboardPage {
     return this.page.getByTestId(`job-card-${company}`);
   }
 
-  async deleteJob(company: string) {
+  async clickDeleteJob(company: string) {
     const card = this.getJobCard(company);
     await card.getByRole('button', { name: 'Delete' }).click();
+  }
+
+  async confirmDelete() {
+    await this.confirmDeleteButton.click();
+  }
+
+  async cancelDelete() {
+    await this.cancelDeleteButton.click();
+  }
+
+  async deleteJob(company: string) {
+    await this.clickDeleteJob(company);
+    await this.confirmDelete();
   }
 
   async clickEditJob(company: string) {
