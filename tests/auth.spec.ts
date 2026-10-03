@@ -75,8 +75,8 @@ test.describe('Flujos de Autenticación E2E', () => {
     // ACT: cerrar sesión a través de DashboardPage
     await dashboard.logout();
 
-    // ASSERT: vuelve a la pantalla de login
-    await expect(auth.loginButton).toBeVisible();
+    // ASSERT: vuelve a la landing page pública
+    await expect(page.getByTestId('landing-login-btn')).toBeVisible();
     await expect(dashboard.logoutButton).not.toBeVisible();
 
     // ASSERT: el token de localStorage fue eliminado

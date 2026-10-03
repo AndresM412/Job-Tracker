@@ -24,8 +24,8 @@ export class AuthPage {
     this.passwordInput = page.locator('input[type="password"]').first();
     this.confirmPasswordInput = page.locator('input[type="password"]').nth(1);
 
-    this.loginButton = page.getByRole('button', { name: 'Iniciar Sesión' });
-    this.registerButton = page.getByRole('button', { name: 'Crear Cuenta' });
+    this.loginButton = page.getByTestId('auth-submit-btn');
+    this.registerButton = page.getByTestId('auth-submit-btn');
     this.switchToRegisterButton = page.getByRole('button', { name: '¿No tienes cuenta? Regístrate aquí' });
     this.switchToLoginButton = page.getByRole('button', { name: '¿Ya tienes cuenta? Inicia sesión' });
     this.errorMessage = page.locator('.bg-rejected\\/10');
@@ -33,6 +33,10 @@ export class AuthPage {
 
   async goto() {
     await this.page.goto('/');
+    const landingLoginBtn = this.page.getByTestId('landing-login-btn');
+    if (await landingLoginBtn.isVisible()) {
+      await landingLoginBtn.click();
+    }
   }
 
   async switchToRegister() {

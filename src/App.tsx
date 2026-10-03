@@ -7,7 +7,17 @@ import FilterBar, { type FilterValue } from "./components/filters/FilterBar";
 import SearchBar from "./components/filters/SearchBar";
 import SortControl, { type SortOrder } from "./components/filters/SortControl";
 import { AuthForm } from "./components/AuthForm";
+import { LandingPage } from "./components/LandingPage";
 import * as jobsApi from "./services/jobsApi";
+
+type UnauthView = "landing" | "login" | "register";
+
+function getUnauthViewFromPath(): UnauthView {
+  const path = window.location.pathname;
+  if (path === "/login") return "login";
+  if (path === "/register") return "register";
+  return "landing";
+}
 
 function App() {
   const [token, setToken] = useState<string | null>(() =>
@@ -17,6 +27,7 @@ function App() {
     localStorage.getItem("job_tracker_user_email"),
   );
 
+  const [unauthView, setUnauthView] = useState<UnauthView>(getUnauthViewFromPath);
   const [jobs, setJobs] = useState<JobApplication[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +38,26 @@ function App() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   const [authNotice, setAuthNotice] = useState<string | null>(null);
+
+  // Escuchar navegación con flechas de atrás/adelante del navegador (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      setUnauthView(getUnauthViewFromPath());
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  const navigateTo = (mode: "login" | "register" | "landing") => {
+    const targetPath = mode === "landing" ? "/" : `/${mode}`;
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({}, "", targetPath);
+    }
+    setUnauthView(mode);
+  };
 
   useEffect(() => {
     if (!token) return;
@@ -59,6 +90,9 @@ function App() {
     setToken(newToken);
     setUserEmail(email);
     setAuthNotice(null);
+    if (window.location.pathname !== "/") {
+      window.history.replaceState({}, "", "/");
+    }
   };
 
   const handleLogout = (notice?: string) => {
@@ -69,13 +103,31 @@ function App() {
     setJobs([]);
     if (typeof notice === "string") {
       setAuthNotice(notice);
+      if (window.location.pathname !== "/login") {
+        window.history.replaceState({}, "", "/login");
+      }
+      setUnauthView("login");
     } else {
       setAuthNotice(null);
+      if (window.location.pathname !== "/") {
+        window.history.pushState({}, "", "/");
+      }
+      setUnauthView("landing");
     }
   };
 
   if (!token) {
-    return <AuthForm onSuccess={handleLoginSuccess} initialError={authNotice} />;
+    if (unauthView === "landing") {
+      return <LandingPage onNavigateToAuth={navigateTo} />;
+    }
+
+    return (
+      <AuthForm
+        onSuccess={handleLoginSuccess}
+        initialError={authNotice}
+        initialMode={unauthView}
+      />
+    );
   }
 
   async function addJob(newJob: JobApplication) {

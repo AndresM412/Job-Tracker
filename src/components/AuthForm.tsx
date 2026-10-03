@@ -4,10 +4,15 @@ import { loginApi, registerApi } from "../services/authApi";
 interface AuthFormProps {
   onSuccess: (token: string, email: string) => void;
   initialError?: string | null;
+  initialMode?: "login" | "register";
 }
 
-export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess, initialError }) => {
-  const [isRegister, setIsRegister] = useState(false);
+export const AuthForm: React.FC<AuthFormProps> = ({
+  onSuccess,
+  initialError,
+  initialMode = "login",
+}) => {
+  const [isRegister, setIsRegister] = useState(initialMode === "register");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -41,7 +46,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess, initialError }) =
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-bg px-4 py-12">
-      <div className="max-w-md w-full bg-surface border border-border rounded-xl p-8 shadow-2xl">
+      <div className="max-w-md w-full bg-surface border border-border rounded-xl p-8 shadow-2xl relative">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold font-display text-text mb-2">
             Job Tracker
@@ -107,13 +112,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess, initialError }) =
           <button
             type="submit"
             disabled={loading}
+            data-testid="auth-submit-btn"
             className="btn-submit w-full mt-6 py-2.5"
           >
             {loading
               ? "Procesando..."
               : isRegister
-              ? "Crear Cuenta"
-              : "Iniciar Sesión"}
+                ? "Crear Cuenta"
+                : "Iniciar Sesión"}
           </button>
         </form>
 
