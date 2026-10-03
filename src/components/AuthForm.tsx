@@ -24,7 +24,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
     setError(null);
 
     if (isRegister && password !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
+      setError("Passwords do not match");
       return;
     }
 
@@ -38,7 +38,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
       const token = await loginApi(email, password);
       onSuccess(token, email);
     } catch (err: any) {
-      setError(err.message || "Ocurrió un error inesperado");
+      setError(err.message || "An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -53,8 +53,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({
           </h1>
           <p className="text-sm text-muted">
             {isRegister
-              ? "Crea una cuenta para organizar tus postulaciones"
-              : "Inicia sesión para gestionar tus postulaciones"}
+              ? "Create an account to organize your applications"
+              : "Sign in to manage your applications"}
           </p>
         </div>
 
@@ -66,13 +66,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-muted mb-1">
-              Correo Electrónico
+            <label htmlFor="auth-email" className="block text-xs font-medium text-muted mb-1">
+              Email Address
             </label>
             <input
+              id="auth-email"
               type="email"
               required
-              placeholder="tu@email.com"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="input-field w-full"
@@ -80,10 +81,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-muted mb-1">
-              Contraseña
+            <label htmlFor="auth-password" className="block text-xs font-medium text-muted mb-1">
+              Password
             </label>
             <input
+              id="auth-password"
               type="password"
               required
               placeholder="••••••••"
@@ -95,10 +97,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 
           {isRegister && (
             <div>
-              <label className="block text-xs font-medium text-muted mb-1">
-                Confirmar Contraseña
+              <label htmlFor="auth-confirm-password" className="block text-xs font-medium text-muted mb-1">
+                Confirm Password
               </label>
               <input
+                id="auth-confirm-password"
                 type="password"
                 required
                 placeholder="••••••••"
@@ -116,10 +119,10 @@ export const AuthForm: React.FC<AuthFormProps> = ({
             className="btn-submit w-full mt-6 py-2.5"
           >
             {loading
-              ? "Procesando..."
+              ? "Processing..."
               : isRegister
-                ? "Crear Cuenta"
-                : "Iniciar Sesión"}
+                ? "Create Account"
+                : "Log In"}
           </button>
         </form>
 
@@ -133,8 +136,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({
             className="text-xs text-interview hover:underline cursor-pointer"
           >
             {isRegister
-              ? "¿Ya tienes cuenta? Inicia sesión aquí"
-              : "¿No tienes cuenta? Regístrate aquí"}
+              ? "Already have an account? Sign in here"
+              : "Don't have an account? Sign up here"}
           </button>
         </div>
       </div>

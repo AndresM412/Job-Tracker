@@ -99,7 +99,7 @@ test.describe('Flujos de Autenticación E2E', () => {
 
     // 3. ASSERT: aviso de sesión expirada y botones
     await expect(auth.errorMessage).toContainText(
-      'Tu sesión ha expirado por inactividad. Por favor, vuelve a iniciar sesión.'
+      'Your session has expired due to inactivity. Please log in again.'
     );
     await expect(auth.loginButton).toBeVisible();
     await expect(dashboard.logoutButton).not.toBeVisible();

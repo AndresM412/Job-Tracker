@@ -62,16 +62,16 @@ function ConfirmDeleteModal({
               id="confirm-delete-title"
               className="font-display font-medium text-lg text-text"
             >
-              ¿Eliminar postulación?
+              Delete application?
             </h2>
             <p
               id="confirm-delete-description"
               className="text-muted text-sm mt-1"
             >
-              ¿Estás seguro de que deseas eliminar la postulación para{" "}
+              Are you sure you want to delete the application for{" "}
               <span className="text-text font-medium">{job.company}</span> (
-              <span className="text-text/80">{job.position}</span>)? Esta acción
-              no se puede deshacer.
+              <span className="text-text/80">{job.position}</span>)? This action
+              cannot be undone.
             </p>
           </div>
         </div>
@@ -83,7 +83,7 @@ function ConfirmDeleteModal({
             onClick={onCancel}
             className="px-4 py-2 rounded-lg text-sm font-medium border border-border text-muted hover:text-text hover:bg-border/40 transition-colors cursor-pointer"
           >
-            Cancelar
+            Cancel
           </button>
           <button
             type="button"
@@ -91,7 +91,7 @@ function ConfirmDeleteModal({
             onClick={onConfirm}
             className="px-4 py-2 rounded-lg text-sm font-semibold bg-rejected text-bg hover:brightness-110 active:scale-95 transition-all shadow-md shadow-rejected/20 cursor-pointer"
           >
-            Eliminar
+            Delete
           </button>
         </div>
       </div>

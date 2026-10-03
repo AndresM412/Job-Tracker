@@ -20,14 +20,14 @@ export class AuthPage {
   constructor(page: Page) {
     this.page = page;
 
-    this.emailInput = page.getByPlaceholder('tu@email.com');
+    this.emailInput = page.getByLabel(/email/i);
     this.passwordInput = page.locator('input[type="password"]').first();
     this.confirmPasswordInput = page.locator('input[type="password"]').nth(1);
 
     this.loginButton = page.getByTestId('auth-submit-btn');
     this.registerButton = page.getByTestId('auth-submit-btn');
-    this.switchToRegisterButton = page.getByRole('button', { name: '¿No tienes cuenta? Regístrate aquí' });
-    this.switchToLoginButton = page.getByRole('button', { name: '¿Ya tienes cuenta? Inicia sesión' });
+    this.switchToRegisterButton = page.getByRole('button', { name: /Sign up here/i });
+    this.switchToLoginButton = page.getByRole('button', { name: /Sign in here/i });
     this.errorMessage = page.locator('.bg-rejected\\/10');
   }
 

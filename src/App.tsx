@@ -70,11 +70,11 @@ function App() {
         setError(null);
       } catch (err: any) {
         if (err?.message === "SESSION_EXPIRED") {
-          handleLogout("Tu sesión ha expirado por inactividad. Por favor, vuelve a iniciar sesión.");
+          handleLogout("Your session has expired due to inactivity. Please log in again.");
           return;
         }
         setError(
-          "No se pudieron cargar las postulaciones. ¿Está el servidor corriendo?",
+          "Failed to load applications. Is the server running?",
         );
       } finally {
         setIsLoading(false);
@@ -137,10 +137,10 @@ function App() {
       setJobs((currentJobs) => [...currentJobs, createdJob]);
     } catch (err: any) {
       if (err?.message === "SESSION_EXPIRED") {
-        handleLogout("Tu sesión ha expirado por inactividad. Por favor, vuelve a iniciar sesión.");
+        handleLogout("Your session has expired due to inactivity. Please log in again.");
         return;
       }
-      setError("No se pudo crear la postulación.");
+      setError("Failed to create application.");
     }
   }
 
@@ -150,10 +150,10 @@ function App() {
       setJobs((currentJobs) => currentJobs.filter((job) => job.id !== id));
     } catch (err: any) {
       if (err?.message === "SESSION_EXPIRED") {
-        handleLogout("Tu sesión ha expirado por inactividad. Por favor, vuelve a iniciar sesión.");
+        handleLogout("Your session has expired due to inactivity. Please log in again.");
         return;
       }
-      setError("No se pudo eliminar la postulación.");
+      setError("Failed to delete application.");
     }
   }
 
@@ -166,10 +166,10 @@ function App() {
       setEditingJob(null);
     } catch (err: any) {
       if (err?.message === "SESSION_EXPIRED") {
-        handleLogout("Tu sesión ha expirado por inactividad. Por favor, vuelve a iniciar sesión.");
+        handleLogout("Your session has expired due to inactivity. Please log in again.");
         return;
       }
-      setError("No se pudo actualizar la postulación.");
+      setError("Failed to update application.");
     }
   }
 
@@ -217,7 +217,7 @@ function App() {
             onClick={() => handleLogout()}
             className="btn-secondary text-xs py-1.5 px-3"
           >
-            Cerrar Sesión
+            Log Out
           </button>
         </div>
       </header>

@@ -58,7 +58,7 @@ export class DashboardPage {
     this.deleteModalBackdrop = page.getByTestId('confirm-delete-modal-backdrop');
 
     // Sesión
-    this.logoutButton = page.getByRole('button', { name: 'Cerrar Sesión' });
+    this.logoutButton = page.getByRole('button', { name: 'Log Out' });
   }
 
   // --- Acciones de Navegación e Interacción ---

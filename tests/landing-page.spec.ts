@@ -32,7 +32,7 @@ test.describe('Landing Page y Flujos de Navegación', () => {
     await expect(page).toHaveURL(/\/login$/);
     await expect(auth.emailInput).toBeVisible();
     await expect(auth.passwordInput).toBeVisible();
-    await expect(auth.loginButton).toHaveText('Iniciar Sesión');
+    await expect(auth.loginButton).toHaveText('Log In');
   });
 
   test('el botón "Sign Up" en la esquina navega a /register', async ({ page }) => {
@@ -48,7 +48,7 @@ test.describe('Landing Page y Flujos de Navegación', () => {
     await expect(auth.emailInput).toBeVisible();
     await expect(auth.passwordInput).toBeVisible();
     await expect(auth.confirmPasswordInput).toBeVisible();
-    await expect(auth.registerButton).toHaveText('Crear Cuenta');
+    await expect(auth.registerButton).toHaveText('Create Account');
   });
 
   test('la flecha "Atrás" del navegador regresa a la landing page', async ({ page }) => {
@@ -82,6 +82,6 @@ test.describe('Landing Page y Flujos de Navegación', () => {
     // ASSERT: formulario de registro abierto en /register
     await expect(page).toHaveURL(/\/register$/);
     await expect(auth.confirmPasswordInput).toBeVisible();
-    await expect(auth.registerButton).toHaveText('Crear Cuenta');
+    await expect(auth.registerButton).toHaveText('Create Account');
   });
 });
