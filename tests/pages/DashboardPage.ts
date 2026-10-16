@@ -31,7 +31,14 @@ export class DashboardPage {
   readonly deleteModalTitle: Locator;
   readonly deleteModalBackdrop: Locator;
 
-  // 3. Locators de Sesión
+  // 3. Locators de Navegación de Vistas
+  readonly applicationsTab: Locator;
+  readonly calendarTab: Locator;
+  readonly companiesTab: Locator;
+  readonly calendarPlaceholder: Locator;
+  readonly companiesPlaceholder: Locator;
+
+  // 4. Locators de Sesión
   readonly logoutButton: Locator;
 
   constructor(page: Page) {
@@ -57,11 +64,30 @@ export class DashboardPage {
     this.deleteModalTitle = page.locator('#confirm-delete-title');
     this.deleteModalBackdrop = page.getByTestId('confirm-delete-modal-backdrop');
 
+    // Navegación de Pestañas
+    this.applicationsTab = page.getByTestId('tab-applications');
+    this.calendarTab = page.getByTestId('tab-calendar');
+    this.companiesTab = page.getByTestId('tab-companies');
+    this.calendarPlaceholder = page.getByTestId('view-calendar-placeholder');
+    this.companiesPlaceholder = page.getByTestId('view-target-hub-placeholder');
+
     // Sesión
     this.logoutButton = page.getByRole('button', { name: 'Log Out' });
   }
 
   // --- Acciones de Navegación e Interacción ---
+
+  async switchToApplications() {
+    await this.applicationsTab.click();
+  }
+
+  async switchToCalendar() {
+    await this.calendarTab.click();
+  }
+
+  async switchToCompanies() {
+    await this.companiesTab.click();
+  }
 
   async goto() {
     await this.page.goto('/');

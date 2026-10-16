@@ -34,3 +34,6 @@ dist-ssr
 
 # Seed Loaded Data
 seed-data.js
+
+#Mockups files
+/mockup-stitch/

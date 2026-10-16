@@ -8,6 +8,9 @@ import SearchBar from "./components/filters/SearchBar";
 import SortControl, { type SortOrder } from "./components/filters/SortControl";
 import { AuthForm } from "./components/AuthForm";
 import { LandingPage } from "./components/LandingPage";
+import { NavigationTabs, type ActiveTab } from "./components/NavigationTabs";
+import { CalendarPlaceholder } from "./components/CalendarPlaceholder";
+import { TargetHubPlaceholder } from "./components/TargetHubPlaceholder";
 import * as jobsApi from "./services/jobsApi";
 
 type UnauthView = "landing" | "login" | "register";
@@ -36,6 +39,7 @@ function App() {
   const [filterStatus, setFilterStatus] = useState<FilterValue>("All");
   const [searchText, setSearchText] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("applications");
 
   const [authNotice, setAuthNotice] = useState<string | null>(null);
 
@@ -197,13 +201,23 @@ function App() {
 
   return (
     <div className="min-h-screen bg-bg px-6 py-8 max-w-5xl mx-auto">
-      {/* Header con Info de Usuario y Logout */}
-      <header className="flex items-center justify-between pb-6 mb-8 border-b border-border">
-        <h1 className="font-display text-2xl font-bold text-text">
-          Job Tracker
-        </h1>
+      {/* Header con Info de Usuario, Pestañas de Navegación y Logout */}
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 mb-8 border-b border-border">
+        <div className="flex items-center gap-3 shrink-0">
+          <h1 className="font-display text-2xl font-bold text-text whitespace-nowrap">
+            Job Tracker
+          </h1>
+        </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex justify-center shrink-0">
+          <NavigationTabs
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            applicationCount={jobs.length}
+          />
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0 self-end md:self-auto">
           <div className="flex items-center gap-2 bg-surface border border-border px-3 py-1.5 rounded-full">
             <div className="w-6 h-6 rounded-full bg-interview text-bg font-bold text-xs flex items-center justify-center">
               {userInitial}
@@ -228,34 +242,42 @@ function App() {
         </div>
       )}
 
-      <StatsBanner jobs={jobs} />
+      {activeTab === "applications" && (
+        <>
+          <StatsBanner jobs={jobs} />
 
-      <JobForm
-        onAddJob={addJob}
-        onUpdateJob={updateJob}
-        editingJob={editingJob}
-      />
-      <SearchBar value={searchText} onChange={setSearchText} />
+          <JobForm
+            onAddJob={addJob}
+            onUpdateJob={updateJob}
+            editingJob={editingJob}
+          />
+          <SearchBar value={searchText} onChange={setSearchText} />
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-        <FilterBar
-          currentFilter={filterStatus}
-          onFilterChange={setFilterStatus}
-        />
-        <SortControl value={sortOrder} onChange={setSortOrder} />
-      </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+            <FilterBar
+              currentFilter={filterStatus}
+              onFilterChange={setFilterStatus}
+            />
+            <SortControl value={sortOrder} onChange={setSortOrder} />
+          </div>
 
-      {isLoading ? (
-        <div className="text-center py-16 text-muted text-sm">
-          Loading applications...
-        </div>
-      ) : (
-        <JobList
-          jobs={sortedJobs}
-          onDeleteJob={deleteJob}
-          onEditJob={setEditingJob}
-        />
+          {isLoading ? (
+            <div className="text-center py-16 text-muted text-sm">
+              Loading applications...
+            </div>
+          ) : (
+            <JobList
+              jobs={sortedJobs}
+              onDeleteJob={deleteJob}
+              onEditJob={setEditingJob}
+            />
+          )}
+        </>
       )}
+
+      {activeTab === "calendar" && <CalendarPlaceholder />}
+
+      {activeTab === "companies" && <TargetHubPlaceholder />}
     </div>
   );
 }
