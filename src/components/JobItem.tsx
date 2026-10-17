@@ -44,9 +44,29 @@ function JobItem({ job, onRequestDelete, onEditJob }: JobItemProps) {
             <StatusBadge status={job.status} />
           </div>
 
-          <p className="font-mono text-xs text-muted/80 mt-2">
-            {job.applicationDate}
-          </p>
+          <div className="flex items-center gap-1.5 font-mono text-xs text-muted/80 mt-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-3.5 h-3.5 opacity-60 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.75}
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            <span>{job.applicationDate}</span>
+          </div>
+
+          {job.notes && (
+            <div className="bg-bg/60 border border-border/40 rounded-lg p-2.5 my-2 text-xs text-muted/90 leading-relaxed line-clamp-2">
+              {job.notes}
+            </div>
+          )}
 
           <div className="flex gap-2 mt-auto pt-3">
             <button

@@ -63,7 +63,19 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
   }
 
   return (
-    <div className="bg-surface border border-border rounded-lg p-5 mb-8">
+    <div className="bg-surface border border-border rounded-xl p-5 mb-8 shadow-sm">
+      <div className="flex items-center justify-between mb-4 pb-3 border-b border-border/50">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-interview animate-pulse"></span>
+          <h2 className="font-display font-semibold text-sm text-text">
+            {editingJob ? "Edit Application" : "Stage New Application"}
+          </h2>
+        </div>
+        <span className="text-[11px] font-mono text-muted/60 uppercase tracking-wider hidden sm:inline">
+          {editingJob ? "Updating records" : "Command Center Queue"}
+        </span>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-4 gap-3">
         <input
           value={company}

@@ -257,6 +257,7 @@ function App() {
             <FilterBar
               currentFilter={filterStatus}
               onFilterChange={setFilterStatus}
+              jobs={jobs}
             />
             <SortControl value={sortOrder} onChange={setSortOrder} />
           </div>
