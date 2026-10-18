@@ -11,12 +11,13 @@ type FilterBarProps = {
 const filterConfig: Array<{
   value: FilterValue;
   dotColor?: string;
+  textColor?: string;
 }> = [
-  { value: "All" },
-  { value: "Applied", dotColor: "bg-applied" },
-  { value: "Interview", dotColor: "bg-interview" },
-  { value: "Offer", dotColor: "bg-offer" },
-  { value: "Rejected", dotColor: "bg-rejected" },
+  { value: "All", textColor: "text-on-surface" },
+  { value: "Applied", dotColor: "bg-tertiary", textColor: "text-tertiary" },
+  { value: "Interview", dotColor: "bg-primary-container", textColor: "text-primary-container" },
+  { value: "Offer", dotColor: "bg-secondary", textColor: "text-secondary" },
+  { value: "Rejected", dotColor: "bg-error", textColor: "text-error" },
 ];
 
 function FilterBar({ currentFilter, onFilterChange, jobs }: FilterBarProps) {
@@ -28,7 +29,7 @@ function FilterBar({ currentFilter, onFilterChange, jobs }: FilterBarProps) {
 
   return (
     <div className="flex gap-2 flex-wrap items-center">
-      {filterConfig.map(({ value, dotColor }) => {
+      {filterConfig.map(({ value, dotColor, textColor }) => {
         const isActive = currentFilter === value;
         const count = getCount(value);
 
@@ -37,24 +38,25 @@ function FilterBar({ currentFilter, onFilterChange, jobs }: FilterBarProps) {
             key={value}
             aria-label={value}
             onClick={() => onFilterChange(value)}
-            className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+            className={`text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
               isActive
-                ? "bg-interview/25 border-interview/60 text-text font-semibold shadow-[0_0_12px_rgba(139,127,232,0.2)]"
-                : "border-border/70 text-muted hover:text-text hover:border-border hover:bg-surface/50"
+                ? "bg-on-surface text-surface shadow-sm"
+                : `bg-surface-container ${textColor} hover:bg-surface-container-high`
             }`}
           >
             {dotColor && (
               <span
-                className={`w-1.5 h-1.5 rounded-full ${dotColor} ${
-                  isActive ? "shadow-[0_0_6px_currentColor]" : ""
-                }`}
+                className={`w-1.5 h-1.5 rounded-full ${dotColor} animate-pulse`}
               />
             )}
+
             <span>{value}</span>
             {count !== undefined && (
               <span
                 className={`px-1.5 py-0.2 text-[10px] rounded-full font-semibold ${
-                  isActive ? "bg-interview/30 text-interview" : "bg-border/60 text-muted"
+                  isActive
+                    ? "bg-surface/20 text-surface"
+                    : "bg-surface-variant text-on-surface-variant"
                 }`}
               >
                 {count}
@@ -68,3 +70,4 @@ function FilterBar({ currentFilter, onFilterChange, jobs }: FilterBarProps) {
 }
 
 export default FilterBar;
+
