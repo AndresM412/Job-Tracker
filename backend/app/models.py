@@ -11,6 +11,8 @@ class JobApplication(Base):
     status = Column(String, nullable=False)
     application_date = Column(Date, nullable=False)
     notes = Column(String, nullable=True)
+    salary = Column(String(50), nullable=True)
+    round = Column(String(50), nullable=True)
 
 
 class User(Base):

@@ -1,23 +1,27 @@
 type CardProps = {
   children: React.ReactNode;
-  accentColor?: string;
+  spineClass?: string;
   glowClass?: string;
   "data-testid"?: string;
 };
 
-function Card({ children, accentColor, glowClass = "", "data-testid": testId }: CardProps) {
+function Card({
+  children,
+  spineClass = "bg-primary-container",
+  glowClass = "",
+  "data-testid": testId,
+}: CardProps) {
   return (
-    <div
+    <article
       data-testid={testId}
-      className={`relative bg-surface border border-border/80 rounded-xl pl-5 pr-5 py-4 flex flex-col gap-1 h-full transition-all duration-200 hover:-translate-y-0.5 ${glowClass}`}
+      className={`group relative bg-surface-container-low/95 rounded-xl p-5 shadow-sm hover:bg-surface-container transition-all flex flex-col justify-between overflow-hidden h-full ${glowClass}`}
     >
-      <div
-        className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl"
-        style={{ backgroundColor: accentColor ?? "var(--color-border)" }}
-      />
+      <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${spineClass}`} />
       {children}
-    </div>
+    </article>
   );
 }
 
 export default Card;
+
+

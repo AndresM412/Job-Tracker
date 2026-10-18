@@ -14,7 +14,7 @@ function JobList({ jobs, onDeleteJob, onEditJob }: JobListProps) {
 
   if (jobs.length === 0) {
     return (
-      <div className="text-center py-16 text-muted text-sm">
+      <div className="text-center py-16 text-on-surface-variant text-sm font-medium">
         No applications match this filter.
       </div>
     );
@@ -22,7 +22,7 @@ function JobList({ jobs, onDeleteJob, onEditJob }: JobListProps) {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-8">
         {jobs.map((job) => (
           <JobItem
             key={job.id}
@@ -48,3 +48,4 @@ function JobList({ jobs, onDeleteJob, onEditJob }: JobListProps) {
 }
 
 export default JobList;
+

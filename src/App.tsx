@@ -200,86 +200,106 @@ function App() {
   const userInitial = userEmail ? userEmail.charAt(0).toUpperCase() : "U";
 
   return (
-    <div className="min-h-screen bg-bg px-6 py-8 max-w-5xl mx-auto">
+    <div className="min-h-screen bg-surface font-sans text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container">
       {/* Header con Info de Usuario, Pestañas de Navegación y Logout */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 mb-8 border-b border-border">
-        <div className="flex items-center gap-3 shrink-0">
-          <h1 className="font-display text-2xl font-bold text-text whitespace-nowrap">
-            Job Tracker
-          </h1>
-        </div>
-
-        <div className="flex justify-center shrink-0">
-          <NavigationTabs
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            applicationCount={jobs.length}
-          />
-        </div>
-
-        <div className="flex items-center gap-3 shrink-0 self-end md:self-auto">
-          <div className="flex items-center gap-2 bg-surface border border-border px-3 py-1.5 rounded-full">
-            <div className="w-6 h-6 rounded-full bg-interview text-bg font-bold text-xs flex items-center justify-center">
-              {userInitial}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-xl border-b border-outline-variant/30">
+        <div className="h-16 max-w-7xl mx-auto px-6 flex items-center justify-between gap-6">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-surface-container-high border border-outline-variant/50 flex items-center justify-center shadow-[0_0_12px_rgba(129,140,248,0.2)]">
+              <span className="text-sm font-bold text-primary tracking-tighter">JT</span>
             </div>
-            <span className="text-xs text-text max-w-[150px] truncate">
-              {userEmail}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-base font-semibold text-on-surface tracking-tight">Job Tracker</span>
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-surface-variant text-on-surface-variant border border-outline-variant/40">
+                Command Center
+              </span>
+            </div>
           </div>
 
-          <button
-            onClick={() => handleLogout()}
-            className="btn-secondary text-xs py-1.5 px-3"
-          >
-            Log Out
-          </button>
+          <div className="flex items-center justify-center overflow-x-auto">
+            <NavigationTabs
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              applicationCount={jobs.length}
+            />
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface-container-low border border-outline-variant/30">
+              <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                <span className="material-symbols-outlined text-on-primary text-[14px]">person</span>
+              </div>
+              <span className="text-xs text-on-surface-variant hidden sm:inline-block max-w-[160px] truncate">
+                {userEmail}
+              </span>
+            </div>
+
+            <button
+              onClick={() => handleLogout()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant/40 bg-surface-container-low hover:bg-error-container/20 hover:border-error/40 text-on-surface-variant hover:text-error transition-all text-xs font-medium cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">logout</span>
+              <span className="hidden sm:inline">Log Out</span>
+            </button>
+          </div>
         </div>
       </header>
 
-      {error && (
-        <div className="bg-rejected/10 border border-rejected text-rejected text-sm rounded-lg p-3 mb-4">
-          {error}
-        </div>
-      )}
+      {/* Main Content Area */}
+      <main className="w-full pt-20 bg-surface min-h-[calc(100vh-4rem)]">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          {error && (
 
-      {activeTab === "applications" && (
-        <>
-          <StatsBanner jobs={jobs} />
-
-          <JobForm
-            onAddJob={addJob}
-            onUpdateJob={updateJob}
-            editingJob={editingJob}
-          />
-          <SearchBar value={searchText} onChange={setSearchText} />
-
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-            <FilterBar
-              currentFilter={filterStatus}
-              onFilterChange={setFilterStatus}
-            />
-            <SortControl value={sortOrder} onChange={setSortOrder} />
-          </div>
-
-          {isLoading ? (
-            <div className="text-center py-16 text-muted text-sm">
-              Loading applications...
+            <div className="bg-error-container/20 border border-error/40 text-error text-sm rounded-xl p-3.5 mb-6">
+              {error}
             </div>
-          ) : (
-            <JobList
-              jobs={sortedJobs}
-              onDeleteJob={deleteJob}
-              onEditJob={setEditingJob}
-            />
           )}
-        </>
-      )}
 
-      {activeTab === "calendar" && <CalendarPlaceholder />}
+          {activeTab === "applications" && (
+            <div className="flex flex-col w-full">
+              <StatsBanner jobs={jobs} />
 
-      {activeTab === "companies" && <TargetHubPlaceholder />}
+              <JobForm
+                onAddJob={addJob}
+                onUpdateJob={updateJob}
+                editingJob={editingJob}
+              />
+
+              <div className="space-y-4 mb-6">
+                <SearchBar value={searchText} onChange={setSearchText} />
+
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <FilterBar
+                    currentFilter={filterStatus}
+                    onFilterChange={setFilterStatus}
+                    jobs={jobs}
+                  />
+                  <SortControl value={sortOrder} onChange={setSortOrder} />
+                </div>
+              </div>
+
+              {isLoading ? (
+                <div className="text-center py-16 text-on-surface-variant text-sm">
+                  Loading applications...
+                </div>
+              ) : (
+                <JobList
+                  jobs={sortedJobs}
+                  onDeleteJob={deleteJob}
+                  onEditJob={setEditingJob}
+                />
+              )}
+            </div>
+          )}
+
+          {activeTab === "calendar" && <CalendarPlaceholder />}
+
+          {activeTab === "companies" && <TargetHubPlaceholder />}
+        </div>
+      </main>
     </div>
   );
 }
 
 export default App;
+

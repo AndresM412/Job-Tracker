@@ -11,4 +11,6 @@ export type JobApplication = {
   status: JobStatus;
   applicationDate: string;
   notes?: string;
+  salary?: string;
+  round?: string;
 };

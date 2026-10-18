@@ -85,6 +85,8 @@ function mapFromApi(apiJob: any): JobApplication {
     status: apiJob.status,
     applicationDate: apiJob.application_date,
     notes: apiJob.notes ?? undefined,
+    salary: apiJob.salary ?? undefined,
+    round: apiJob.round ?? undefined,
   };
 }
 
@@ -95,5 +97,7 @@ function mapToApi(job: Omit<JobApplication, "id"> | JobApplication) {
     status: job.status,
     application_date: job.applicationDate,
     notes: job.notes,
+    salary: job.salary,
+    round: job.round,
   };
 }
