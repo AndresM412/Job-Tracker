@@ -21,13 +21,13 @@ export class AuthPage {
     this.page = page;
 
     this.emailInput = page.getByLabel(/email/i);
-    this.passwordInput = page.locator('input[type="password"]').first();
-    this.confirmPasswordInput = page.locator('input[type="password"]').nth(1);
+    this.passwordInput = page.getByLabel(/^password$/i);
+    this.confirmPasswordInput = page.getByLabel(/^confirm password$/i);
 
     this.loginButton = page.getByTestId('auth-submit-btn');
     this.registerButton = page.getByTestId('auth-submit-btn');
-    this.switchToRegisterButton = page.getByRole('button', { name: /Sign up here/i });
-    this.switchToLoginButton = page.getByRole('button', { name: /Sign in here/i });
+    this.switchToRegisterButton = page.getByTestId('tab-register');
+    this.switchToLoginButton = page.getByTestId('tab-login');
     this.errorMessage = page.locator('.bg-rejected\\/10');
   }
 

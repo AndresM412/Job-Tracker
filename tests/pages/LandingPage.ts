@@ -24,4 +24,8 @@ export class LandingPage {
   async clickRegister() {
     await this.registerButton.click();
   }
+
+  getDemoCard(company: string): Locator {
+    return this.page.locator('#demo').getByRole('heading', { name: company, exact: true });
+  }
 }

@@ -82,6 +82,12 @@ export function SalaryRangeInput({ value, onChange }: SalaryRangeInputProps) {
       return;
     }
 
+    const MAX_SALARY = 999_999_999;
+    if (minNum > MAX_SALARY || maxNum > MAX_SALARY) {
+      setErrorMsg("Salary cannot exceed 999,999,999.");
+      return;
+    }
+
     if (minNum > maxNum) {
       setErrorMsg("Min salary cannot be greater than Max salary.");
       return;
@@ -188,8 +194,11 @@ export function SalaryRangeInput({ value, onChange }: SalaryRangeInputProps) {
               <input
                 type="number"
                 min="0"
+                max="999999999"
                 value={minSalary}
-                onChange={(e) => setMinSalary(e.target.value)}
+                onChange={(e) => {
+                  if (e.target.value.length <= 12) setMinSalary(e.target.value);
+                }}
                 placeholder="e.g. 180000"
                 className="w-full bg-surface-container-lowest text-on-surface text-xs px-3 py-2 rounded-lg placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary-container transition-all"
               />
@@ -201,8 +210,11 @@ export function SalaryRangeInput({ value, onChange }: SalaryRangeInputProps) {
               <input
                 type="number"
                 min="0"
+                max="999999999"
                 value={maxSalary}
-                onChange={(e) => setMaxSalary(e.target.value)}
+                onChange={(e) => {
+                  if (e.target.value.length <= 12) setMaxSalary(e.target.value);
+                }}
                 placeholder="e.g. 220000"
                 className="w-full bg-surface-container-lowest text-on-surface text-xs px-3 py-2 rounded-lg placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary-container transition-all"
               />

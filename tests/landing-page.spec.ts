@@ -15,9 +15,9 @@ test.describe('Landing Page y Flujos de Navegación', () => {
 
     // ASSERT: titular de propuesta de valor y preview del producto en inglés
     await expect(page.getByRole('heading', { name: /Ditch the spreadsheets/i })).toBeVisible();
-    await expect(page.getByText('Google')).toBeVisible();
-    await expect(page.getByText('Stripe')).toBeVisible();
-    await expect(page.getByText('Spotify')).toBeVisible();
+    await expect(landing.getDemoCard('Google')).toBeVisible();
+    await expect(landing.getDemoCard('Stripe')).toBeVisible();
+    await expect(landing.getDemoCard('Spotify')).toBeVisible();
   });
 
   test('el botón "Log In" en la esquina navega a /login', async ({ page }) => {
