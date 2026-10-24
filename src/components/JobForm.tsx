@@ -165,15 +165,29 @@ function JobForm({ onAddJob, onUpdateJob, editingJob }: JobFormProps) {
           </div>
         </div>
 
-        {/* Notes Field */}
-        <div>
+        {/* Notes Field with Character Counter */}
+        <div className="relative">
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Notes (optional) — job link, salary band, recruiter contact, or notes..."
             rows={3}
-            className="w-full bg-surface-container-lowest text-on-surface text-sm p-3.5 rounded-lg placeholder:text-outline focus:outline-none focus:bg-surface-container transition-all resize-none"
+            maxLength={4000}
+            className="w-full bg-surface-container-lowest text-on-surface text-sm p-3.5 pb-6 rounded-lg placeholder:text-outline focus:outline-none focus:bg-surface-container transition-all resize-none"
           />
+          <div className="flex justify-end pr-3 pb-1.5 -mt-6 pointer-events-none">
+            <span
+              className={`text-[11px] font-medium transition-colors ${
+                notes.length >= 3800
+                  ? "text-error"
+                  : notes.length >= 3200
+                  ? "text-tertiary"
+                  : "text-outline/70"
+              }`}
+            >
+              {notes.length}/4000
+            </span>
+          </div>
         </div>
 
         {/* Action Row */}

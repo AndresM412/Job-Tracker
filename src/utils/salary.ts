@@ -30,15 +30,20 @@ export function formatSalaryRange(
 
   const formatNumber = (num: number): string => {
     if (num >= 1_000_000) {
-      const millions = num / 1_000_000;
-      return `${currencyInfo.symbol}${Number.isInteger(millions) ? millions : millions.toFixed(1)}M`;
+      const millions = parseFloat((num / 1_000_000).toFixed(2));
+      return `${currencyInfo.symbol}${millions}M`;
     }
     if (num >= 1_000) {
-      const thousands = num / 1_000;
-      return `${currencyInfo.symbol}${Number.isInteger(thousands) ? thousands : thousands.toFixed(0)}k`;
+      const thousands = parseFloat((num / 1_000).toFixed(2));
+      return `${currencyInfo.symbol}${thousands}k`;
     }
-    return `${currencyInfo.symbol}${num.toLocaleString()}`;
+    return `${currencyInfo.symbol}${num.toLocaleString("en-US")}`;
   };
+
+  // Si min y max son idénticos, no repetir el número
+  if (min === max) {
+    return `${formatNumber(min)} ${currency}`;
+  }
 
   return `${formatNumber(min)} - ${formatNumber(max)} ${currency}`;
 }
@@ -58,28 +63,36 @@ export function parseSalaryRange(
   else if (salaryStr.includes("COP")) currency = "COP";
   else if (salaryStr.includes("USD") || salaryStr.includes("$")) currency = "USD";
 
-  // Extraer números o patrones '180k', '5M' o números planos
-  const parts = salaryStr.split("-");
-  if (parts.length !== 2) return null;
-
   const parsePart = (part: string): string => {
-    const cleaned = part.replace(/[^\d.kKmM]/g, "").trim().toLowerCase();
+    const cleaned = part
+      .replace(/,/g, "")
+      .replace(/[^\d.kKmM]/g, "")
+      .trim()
+      .toLowerCase();
     if (cleaned.endsWith("m")) {
       const val = parseFloat(cleaned.slice(0, -1));
-      return isNaN(val) ? "" : (val * 1_000_000).toString();
+      return isNaN(val) ? "" : Math.round(val * 1_000_000).toString();
     }
     if (cleaned.endsWith("k")) {
       const val = parseFloat(cleaned.slice(0, -1));
-      return isNaN(val) ? "" : (val * 1_000).toString();
+      return isNaN(val) ? "" : Math.round(val * 1_000).toString();
     }
     const val = parseFloat(cleaned);
-    return isNaN(val) ? "" : val.toString();
+    return isNaN(val) ? "" : Math.round(val).toString();
   };
 
-  const min = parsePart(parts[0]);
-  const max = parsePart(parts[1]);
+  // Manejar caso rango "min - max" o valor único "min"
+  const parts = salaryStr.split("-");
+  if (parts.length === 2) {
+    const min = parsePart(parts[0]);
+    const max = parsePart(parts[1]);
+    if (!min || !max) return null;
+    return { min, max, currency };
+  } else if (parts.length === 1) {
+    const single = parsePart(parts[0]);
+    if (!single) return null;
+    return { min: single, max: single, currency };
+  }
 
-  if (!min || !max) return null;
-
-  return { min, max, currency };
+  return null;
 }

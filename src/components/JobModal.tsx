@@ -63,7 +63,8 @@ function JobModal({ job, onClose }: JobModalProps) {
             </span>
           )}
           {job.salary && (
-            <span className="px-2.5 py-0.5 rounded-full bg-surface-container-highest text-on-surface text-[11px] font-semibold border border-outline-variant/30">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container-highest text-on-surface text-[11px] font-semibold border border-outline-variant/30">
+              <span className="material-symbols-outlined text-[13px] text-outline">payments</span>
               {job.salary}
             </span>
           )}

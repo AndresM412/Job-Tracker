@@ -50,27 +50,28 @@ function JobItem({ job, onRequestDelete, onEditJob }: JobItemProps) {
             </div>
 
             {/* Date & Salary Row */}
-            <div className="flex items-center gap-2 mb-3 text-on-surface-variant/80 text-xs">
-              <svg
-                className="w-3.5 h-3.5 text-on-surface-variant/70 shrink-0"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.75}
-              >
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              <span>{job.applicationDate}</span>
+            <div className="flex items-center gap-2 mb-3 text-on-surface-variant/80 text-xs min-w-0">
+              <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+                <svg
+                  className="w-3.5 h-3.5 text-on-surface-variant/70 shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.75}
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                <span>{job.applicationDate}</span>
+              </div>
               {job.salary && (
                 <>
-                  <span className="mx-0.5 text-outline-variant/60">•</span>
+                  <span className="shrink-0 text-outline-variant/60">•</span>
                   <span
-                    className={`px-2 py-0.5 rounded bg-surface-container-highest font-semibold text-[11px] leading-tight ${
-                      job.status === "Offer" ? "text-secondary" : "text-on-surface"
-                    }`}
+                    title={job.salary}
+                    className="px-2 py-0.5 rounded bg-surface-container-highest font-semibold text-[11px] leading-tight text-on-surface truncate whitespace-nowrap min-w-0 max-w-[170px]"
                   >
                     {job.salary}
                   </span>
@@ -87,9 +88,10 @@ function JobItem({ job, onRequestDelete, onEditJob }: JobItemProps) {
           </div>
 
           {/* Footer Row */}
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center justify-between pt-2 gap-2 min-w-0">
             <span
-              className={`text-[11px] font-semibold uppercase tracking-wider truncate mr-2 ${
+              title={job.round || undefined}
+              className={`text-[11px] font-semibold uppercase tracking-wider truncate min-w-0 mr-2 ${
                 job.round
                   ? "text-outline"
                   : job.status === "Offer"
