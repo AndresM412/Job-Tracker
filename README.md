@@ -1,7 +1,7 @@
 # Job Tracker 🎯
 
 [![Playwright Tests](https://github.com/AndresM412/Job-Tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/AndresM412/Job-Tracker/actions/workflows/ci.yml)
-![Playwright Tests](https://img.shields.io/badge/playwright-72%20tests%20passing-green?logo=playwright&logoColor=white)
+![Playwright Tests](https://img.shields.io/badge/playwright-84%20tests%20passing-green?logo=playwright&logoColor=white)
 ![Pytest Backend](https://img.shields.io/badge/pytest-8%20tests%20passing-green?logo=pytest&logoColor=white)
 ![React](https://img.shields.io/badge/react-19-61dafb?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/typescript-5-blue?logo=typescript&logoColor=white)
@@ -28,9 +28,9 @@ A full-stack, production-grade web application designed to help tech professiona
 
 ## 📖 Overview
 
-Spreadsheets are unstructured, difficult to query, and offer zero actionable insights during a high-stakes job search. **Job Tracker** solves this problem by delivering a focused, "Control Room" dashboard experience where candidates can:
-1. Centralize job postings with dates, statuses, and recruiter notes.
-2. Track interviews and conversions through a real-time KPI banner.
+Spreadsheets are unstructured, difficult to query, and offer zero actionable insights during a high-stakes job search. **Job Tracker** solves this problem by delivering a focused, "Command Center" dashboard experience where candidates can:
+1. Centralize job postings with application dates, compensation ranges, interview rounds, and recruiter notes.
+2. Track interviews and conversions through a real-time telemetry KPI banner.
 3. Automatically identify and click job offer URLs embedded in notes.
 4. Prevent accidental deletions with an accessible confirmation modal.
 
@@ -38,9 +38,11 @@ Spreadsheets are unstructured, difficult to query, and offer zero actionable ins
 
 ## ✨ Key Features
 
-- **🌐 Modern Landing Page & Native Browser History:** Public showcase page featuring live mockups and feature breakdowns. Full integration with the HTML5 History API (`pushState` and `popstate`) supporting `/login`, `/register`, and native browser Back/Forward (← / →) navigation.
-- **🔒 Multi-Tenant JWT Authentication:** Strict user isolation. Passwords hashed using `bcrypt` (pinned to 4.0.1 for stability). Non-nullable `user_id` foreign keys ensure zero data leakage between accounts.
-- **📊 Real-Time Metrics & Visual Badges:** "Control Room v2" design featuring glowing badge pills for each stage (`Applied`, `Interview`, `Offer`, `Rejected`) and dynamic KPI calculation (Response Rate, Active Interviews).
+- **🌐 Modern Landing Page & Interactive Live Demo (`#demo`):** Public showcase page with responsive marketing sections, feature breakdowns, and an embedded interactive demo workspace with sample telemetry data, live search, status filtering, and sorting before creating an account. Full integration with the HTML5 History API (`pushState` and `popstate`) supporting `/login`, `/register`, and native browser Back/Forward (← / →) navigation.
+- **🔒 Multi-Tenant JWT Authentication:** Strict user isolation. Redesigned authentication card (`AuthForm`) featuring dedicated tab switching (`tab-login` / `tab-register`), show/hide password toggles, and smooth CSS Grid accordion animation. Passwords hashed using `bcrypt` (pinned to 4.0.1 for stability). Non-nullable `user_id` foreign keys ensure zero data leakage between accounts.
+- **💰 Unified Salary Range & Multi-Currency Input (`SalaryRangeInput`):** Floating interactive popover component supporting USD, EUR, and COP compensation ranges with numeric validation caps (up to 999M) and concise badge formatting (`$180k - $210k USD`).
+- **🎯 Interview Stages & Progress Rounds (`round`):** Categorization of candidate interview loops (`Initial Screening`, `Technical Interview`, `Culture Fit`, `Final Round`, `Offer Review`) with dedicated status badges and truncation tooltips.
+- **📊 Real-Time Metrics & Living Telemetry Badges:** "Command Center" design featuring Material 3 Dark Slate tokens, glowing indicator dots with live pulse animation (`animate-pulse`) on active filters and status cards, and technical `.grid-mesh` background pattern.
 - **♿ Accessible Deletion Confirmation Modal (`ConfirmDeleteModal`):** Compliant with **WAI-ARIA** standards (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`). Dismissible via backdrop click, dedicated Cancel button, or the `Escape` key shortcut.
 - **🔍 Instant Search & Chronological Sorting:** Client-side live search querying across company names, roles, and statuses, coupled with ascending/descending date sorting.
 - **🔗 Smart URL Detection in Notes:** Regex-powered auto-detection transforming raw URLs into secure (`rel="noopener noreferrer"`), clickable links.
@@ -53,7 +55,7 @@ The testing strategy follows the **Testing Pyramid** to ensure maximum reliabili
 
 ```
        / \
-      / E2E \         72 Playwright Tests (Chromium, Firefox, WebKit)
+      / E2E \         84 Playwright Tests (Chromium, Firefox, WebKit)
      /-------\        Page Object Model (POM) & User Journeys
     /   API   \       Contract & Multi-Tenancy Isolation
    /-----------\
@@ -71,13 +73,14 @@ The testing strategy follows the **Testing Pyramid** to ensure maximum reliabili
 ### 2. Top Layer: End-to-End Tests (Playwright)
 - **Cross-Browser:** Automated across **Chromium**, **Firefox**, and **WebKit (Safari)**.
 - **Page Object Model (POM):**
-  - **`LandingPage.ts`**: Header buttons, hero CTA routing, and native browser navigation (`page.goBack()`).
-  - **`AuthPage.ts`**: Form authentication, registration mode toggle, and automatic session expiration (401) handling.
+  - **`LandingPage.ts`**: Header buttons, hero CTA routing, `#demo` interactive cards, and native browser navigation (`page.goBack()`).
+  - **`AuthPage.ts`**: Dedicated tab navigation (`tab-login`, `tab-register`), accessible input labels, and automatic session expiration (401) handling.
   - **`DashboardPage.ts`**: Encapsulates job creation, editing, status filtering, search queries, sorting, and accessible deletion modal confirmation.
-- **Coverage (72 tests total):**
+- **Coverage (84 tests total):**
   - 42 tests covering core job lifecycle, sorting, filtering, searching, and auth.
   - 15 tests dedicated to the accessible confirmation modal (Escape key, backdrop, cancel vs confirm).
   - 15 tests validating the landing page, corner auth buttons, and native browser back navigation.
+  - 12 tests validating global navigation tabs (`navigation-tabs.spec.ts`) and workspace state preservation.
 
 ---
 
@@ -86,7 +89,7 @@ The testing strategy follows the **Testing Pyramid** to ensure maximum reliabili
 | Domain | Technology | Purpose |
 | :--- | :--- | :--- |
 | **Frontend** | React 19 + TypeScript | Component-based reactive user interface |
-| **Styling** | Tailwind CSS v4 | Curated dark-mode design system ("Control Room v2") |
+| **Styling** | Tailwind CSS v4 | Curated dark-mode design system ("Command Center" / Material 3 Dark Slate) |
 | **Build Tool** | Vite | Lightning-fast HMR and bundle compilation |
 | **Backend** | FastAPI (Python 3.12) | High-performance asynchronous REST API |
 | **ORM / DB** | SQLAlchemy + PostgreSQL 18 | Relational data persistence with strict foreign keys |
@@ -109,22 +112,27 @@ Job-Tracker/
 │   ├── app/
 │   │   ├── main.py              # FastAPI application entry point & CORS
 │   │   ├── database.py          # SQLAlchemy engine & session dependency
-│   │   ├── models.py            # User & JobApplication SQLAlchemy models
+│   │   ├── models.py            # User & JobApplication SQLAlchemy models (with salary & round)
 │   │   ├── schemas.py           # Pydantic request/response validation schemas
 │   │   └── auth.py              # Password hashing & JWT token logic
 │   ├── tests/                   # Pytest test suite (multi-tenancy & auth)
 │   └── requirements.txt         # Python dependencies
 ├── src/
 │   ├── components/
-│   │   ├── LandingPage.tsx      # Public landing page with native history
-│   │   ├── AuthForm.tsx         # Unified login & registration component
-│   │   ├── JobForm.tsx          # Job creation & editing form
-│   │   ├── JobList.tsx          # Grid container & delete modal state
-│   │   ├── JobItem.tsx          # Job card with glowing badges
+│   │   ├── LandingPage.tsx      # Public landing page with interactive live #demo workspace
+│   │   ├── AuthForm.tsx         # Tabbed authentication modal with password visibility toggle
+│   │   ├── NavigationTabs.tsx   # Global command center navigation bar
+│   │   ├── SalaryRangeInput.tsx # Floating popover for currency selection (USD/EUR/COP) & range limits
+│   │   ├── JobForm.tsx          # 2-column job registration and editing form
+│   │   ├── JobList.tsx          # Responsive grid container & modal controllers
+│   │   ├── JobItem.tsx          # Telemetry card with pulsating badges and notes preview
+│   │   ├── JobModal.tsx         # Detailed job inspection view
 │   │   ├── ConfirmDeleteModal.tsx # Accessible WAI-ARIA confirmation dialog
-│   │   ├── StatsBanner.tsx      # Real-time hiring KPI metrics
-│   │   └── filters/             # SearchBar, FilterBar, and SortControl
-│   ├── services/                # Axios/Fetch API wrappers (authApi & jobsApi)
+│   │   ├── StatsBanner.tsx      # Real-time hiring KPI metrics banner
+│   │   └── filters/             # SearchBar, FilterBar (with pulsing dots), and SortControl
+│   ├── services/                # Fetch API wrappers (authApi & jobsApi)
+│   ├── utils/
+│   │   └── salary.ts            # Currency definitions, range formatting, and numeric parsers
 │   └── types/                   # TypeScript interfaces (JobApplication, User)
 ├── tests/                       # Playwright E2E Test Suite
 │   ├── pages/                   # Page Object Model classes
@@ -140,6 +148,7 @@ Job-Tracker/
 │   ├── filter-by-status.spec.ts # E2E: Status filtering
 │   ├── search.spec.ts           # E2E: Text-based search queries
 │   ├── sort.spec.ts             # E2E: Chronological date sorting
+│   ├── navigation-tabs.spec.ts  # E2E: Command Center tab navigation & state retention
 │   └── landing-page.spec.ts     # E2E: Landing navigation & page.goBack()
 ├── docker-compose.yml           # PostgreSQL 18 container setup
 └── playwright.config.ts         # Playwright multi-project configuration
@@ -198,7 +207,7 @@ pytest backend
 ```
 
 ### End-to-End Tests (Playwright)
-Run the full 72-test cross-browser suite:
+Run the full 84-test cross-browser suite:
 ```bash
 npx playwright test
 ```
