@@ -87,6 +87,7 @@ function mapFromApi(apiJob: any): JobApplication {
     notes: apiJob.notes ?? undefined,
     salary: apiJob.salary ?? undefined,
     round: apiJob.round ?? undefined,
+    createdAt: apiJob.created_at ?? undefined,
   };
 }
 

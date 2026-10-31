@@ -13,4 +13,5 @@ export type JobApplication = {
   notes?: string;
   salary?: string;
   round?: string;
+  createdAt?: string;
 };
