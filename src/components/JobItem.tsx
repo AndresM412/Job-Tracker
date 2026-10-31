@@ -22,14 +22,24 @@ type JobItemProps = {
   job: JobApplication;
   onRequestDelete: (job: JobApplication) => void;
   onEditJob: (job: JobApplication) => void;
+  onViewDetails?: (job: JobApplication) => void;
 };
 
-function JobItem({ job, onRequestDelete, onEditJob }: JobItemProps) {
+function JobItem({ job, onRequestDelete, onEditJob, onViewDetails }: JobItemProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <>
-      <div onClick={() => setIsModalOpen(true)} className="cursor-pointer h-full">
+      <div
+        onClick={() => {
+          if (onViewDetails) {
+            onViewDetails(job);
+          } else {
+            setIsModalOpen(true);
+          }
+        }}
+        className="cursor-pointer h-full"
+      >
         <Card
           spineClass={spineClassMap[job.status] || "bg-primary-container"}
           glowClass={statusGlowClass[job.status]}
