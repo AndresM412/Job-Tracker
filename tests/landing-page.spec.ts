@@ -13,8 +13,18 @@ test.describe('Landing Page y Flujos de Navegación', () => {
     await expect(landing.registerButton).toBeVisible();
     await expect(landing.registerButton).toHaveText('Sign Up');
 
-    // ASSERT: titular de propuesta de valor y preview del producto en inglés
-    await expect(page.getByRole('heading', { name: /Ditch the spreadsheets/i })).toBeVisible();
+    // ASSERT: barra de navegación modular con las 3 pestañas
+    await expect(landing.overviewTab).toBeVisible();
+    await expect(landing.sandboxTab).toBeVisible();
+    await expect(landing.howItWorksTab).toBeVisible();
+
+    // ASSERT: titular principal en la pestaña Overview
+    await expect(page.getByRole('heading', { name: /The focused workspace to organize your job applications/i })).toBeVisible();
+
+    // ACT: cambiar a la pestaña Live Sandbox para explorar el workspace interactivo
+    await landing.switchTab('sandbox');
+
+    // ASSERT: tarjetas de demostración visibles en el sandbox
     await expect(landing.getDemoCard('Google')).toBeVisible();
     await expect(landing.getDemoCard('Stripe')).toBeVisible();
     await expect(landing.getDemoCard('Spotify')).toBeVisible();
