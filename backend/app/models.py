@@ -1,4 +1,5 @@
-from sqlalchemy import Column, String, Date, ForeignKey
+from datetime import datetime, timezone
+from sqlalchemy import Column, String, Date, DateTime, ForeignKey, func
 from app.database import Base
 
 
@@ -13,6 +14,12 @@ class JobApplication(Base):
     notes = Column(String, nullable=True)
     salary = Column(String(50), nullable=True)
     round = Column(String(50), nullable=True)
+    created_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
+        nullable=False,
+    )
 
 
 class User(Base):

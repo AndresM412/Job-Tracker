@@ -124,3 +124,40 @@ def test_user_isolation_multitenancy(client):
     # Usuario B intenta eliminar el empleo de Usuario A -> Debe dar 404 Not Found
     delete_res_b = client.delete(f"/jobs/{job_id_a}", headers=headers_user_b)
     assert delete_res_b.status_code == 404
+
+
+def test_get_jobs_returns_newest_created_first(client):
+    headers = get_auth_headers(client, "lifo_user@example.com")
+
+    # Creamos primero job 1 con fecha de postulación futura
+    client.post(
+        "/jobs",
+        json={
+            "company": "FirstCreated",
+            "position": "Dev",
+            "status": "Applied",
+            "application_date": "2026-12-31",
+        },
+        headers=headers,
+    )
+
+    # Creamos después job 2 con fecha de postulación antigua
+    client.post(
+        "/jobs",
+        json={
+            "company": "SecondCreated",
+            "position": "Dev",
+            "status": "Applied",
+            "application_date": "2026-01-01",
+        },
+        headers=headers,
+    )
+
+    get_res = client.get("/jobs", headers=headers)
+    assert get_res.status_code == 200
+    jobs = get_res.json()
+    assert len(jobs) == 2
+    # El más recientemente creado debe estar de primero (LIFO)
+    assert jobs[0]["company"] == "SecondCreated"
+    assert jobs[1]["company"] == "FirstCreated"
+    assert "created_at" in jobs[0]

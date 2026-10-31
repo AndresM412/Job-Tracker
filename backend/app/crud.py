@@ -6,7 +6,12 @@ from app import models, schemas, auth
 
 
 def get_jobs(db: Session, user_id: str):
-    return db.query(models.JobApplication).filter(models.JobApplication.user_id == user_id).all()
+    return (
+        db.query(models.JobApplication)
+        .filter(models.JobApplication.user_id == user_id)
+        .order_by(models.JobApplication.created_at.desc())
+        .all()
+    )
 
 
 def get_job(db: Session, job_id: str, user_id: str):
