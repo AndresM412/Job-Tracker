@@ -169,7 +169,7 @@ export class DashboardPage {
     await this.searchInput.fill(query);
   }
 
-  async sortBy(order: 'newest' | 'oldest') {
+  async sortBy(order: 'recently_added' | 'newest' | 'oldest') {
     await this.sortSelect.selectOption(order);
   }
 

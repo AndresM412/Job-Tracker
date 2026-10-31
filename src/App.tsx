@@ -43,7 +43,7 @@ function App() {
   const [editingJob, setEditingJob] = useState<JobApplication | null>(null);
   const [filterStatus, setFilterStatus] = useState<FilterValue>("All");
   const [searchText, setSearchText] = useState("");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("recently_added");
   const [activeTab, setActiveTab] = useState<ActiveTab>("applications");
   const [dateRange, setDateRange] = useState<DateRange | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -158,7 +158,7 @@ function App() {
     try {
       const { id: _id, ...jobData } = newJob;
       const createdJob = await jobsApi.createJob(jobData);
-      setJobs((currentJobs) => [...currentJobs, createdJob]);
+      setJobs((currentJobs) => [createdJob, ...currentJobs]);
     } catch (err: any) {
       if (err?.message === "SESSION_EXPIRED") {
         handleLogout("Your session has expired due to inactivity. Please log in again.");
@@ -222,6 +222,12 @@ function App() {
     : searchFiltered;
 
   const sortedJobs = [...dateFiltered].sort((a, b) => {
+    if (sortOrder === "recently_added") {
+      if (a.createdAt && b.createdAt) {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+      return 0;
+    }
     const dateA = new Date(a.applicationDate).getTime();
     const dateB = new Date(b.applicationDate).getTime();
     return sortOrder === "newest" ? dateB - dateA : dateA - dateB;

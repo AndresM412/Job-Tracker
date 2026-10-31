@@ -1,4 +1,4 @@
-export type SortOrder = "newest" | "oldest";
+export type SortOrder = "recently_added" | "newest" | "oldest";
 
 type SortControlProps = {
   value: SortOrder;
@@ -15,8 +15,9 @@ function SortControl({ value, onChange }: SortControlProps) {
         data-testid="sort-control"
         className="bg-surface-container text-on-surface text-xs pl-3.5 pr-8 py-1.5 rounded-lg appearance-none focus:outline-none hover:bg-surface-container-high transition-all cursor-pointer font-medium"
       >
-        <option value="newest">Newest first</option>
-        <option value="oldest">Oldest first</option>
+        <option value="recently_added">Recently added</option>
+        <option value="newest">Application date: Newest</option>
+        <option value="oldest">Application date: Oldest</option>
       </select>
       <span className="material-symbols-outlined text-outline pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[18px]">
         sort
