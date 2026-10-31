@@ -67,6 +67,7 @@
 }
 
 :root {
+  color-scheme: dark;
   --bg-app: #131315;
   --bg-surface: #1c1b1d;
   --bg-surface-hover: #201f22;
@@ -78,6 +79,22 @@
   --status-interview: #818cf8;
   --status-offer: #4edea3;
   --status-rejected: #ffb4ab;
+}
+
+/* Custom Dark Slate Scrollbars across the entire application */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #131315;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a2c;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #454653;
 }
 
 body {

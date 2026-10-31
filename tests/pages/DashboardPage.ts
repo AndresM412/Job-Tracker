@@ -23,6 +23,9 @@ export class DashboardPage {
   // 2. Locators de Búsqueda, Filtros y Ordenamiento
   readonly searchInput: Locator;
   readonly sortSelect: Locator;
+  readonly viewModeGridButton: Locator;
+  readonly viewModeTableButton: Locator;
+  readonly jobTable: Locator;
 
   // Modal de Confirmación de Eliminación
   readonly deleteModal: Locator;
@@ -47,15 +50,18 @@ export class DashboardPage {
     // Formulario de Job
     this.companyInput = page.getByPlaceholder('Company', { exact: true });
     this.positionInput = page.getByPlaceholder('Position', { exact: true });
-    this.statusSelect = page.locator('select').first();
+    this.statusSelect = page.getByTestId('status-select');
     this.dateInput = page.locator('input[type="date"]');
-    this.notesInput = page.getByPlaceholder('Notes (optional)...');
-    this.addJobButton = page.getByRole('button', { name: 'Add Job' });
+    this.notesInput = page.getByPlaceholder(/Notes \(optional\)/i);
+    this.addJobButton = page.getByRole('button', { name: /Add (Application|Job)/i });
     this.saveChangesButton = page.getByRole('button', { name: 'Save Changes' });
 
     // Controles de Filtrado y Ordenamiento
     this.searchInput = page.getByPlaceholder('Search by company, position, or status...');
     this.sortSelect = page.getByTestId('sort-control');
+    this.viewModeGridButton = page.getByTestId('view-mode-grid');
+    this.viewModeTableButton = page.getByTestId('view-mode-table');
+    this.jobTable = page.getByTestId('job-table');
 
     // Modal de Confirmación de Eliminación
     this.deleteModal = page.getByRole('dialog');
@@ -89,11 +95,25 @@ export class DashboardPage {
     await this.companiesTab.click();
   }
 
+  async switchToGridView() {
+    await this.viewModeGridButton.click();
+  }
+
+  async switchToTableView() {
+    await this.viewModeTableButton.click();
+  }
+
   async goto() {
     await this.page.goto('/');
   }
 
   async addJob(job: JobData) {
+    if (!(await this.companyInput.isVisible())) {
+      const openBtn = this.page.getByRole('button', { name: /Add Application/i });
+      if (await openBtn.isVisible()) {
+        await openBtn.click();
+      }
+    }
     await this.companyInput.fill(job.company);
     await this.positionInput.fill(job.position);
     await this.statusSelect.selectOption(job.status || 'Applied');
@@ -101,7 +121,7 @@ export class DashboardPage {
     if (job.notes) {
       await this.notesInput.fill(job.notes);
     }
-    await this.addJobButton.click();
+    await this.page.getByRole('button', { name: 'Add Job' }).click();
   }
 
   getJobCard(company: string): Locator {
@@ -136,7 +156,13 @@ export class DashboardPage {
   }
 
   async filterByStatus(status: string) {
-    await this.page.getByRole('button', { name: status, exact: true }).click();
+    const dropdownBtn = this.page.getByTestId('status-filter-dropdown-btn');
+    if (await dropdownBtn.isVisible()) {
+      await dropdownBtn.click();
+      await this.page.getByTestId(`status-filter-option-${status.toLowerCase()}`).click();
+    } else {
+      await this.page.getByRole('button', { name: status, exact: true }).click();
+    }
   }
 
   async search(query: string) {
