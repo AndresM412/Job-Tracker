@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
 
 export interface JobData {
   company: string;
@@ -44,6 +44,15 @@ export class DashboardPage {
   // 4. Locators de Sesión
   readonly logoutButton: Locator;
 
+  // 5. Locators de Vista Unificada Master-Detail
+  readonly jobDetailView: Locator;
+  readonly jobFormView: Locator;
+  readonly backToApplicationsButton: Locator;
+  readonly formCancelButton: Locator;
+  readonly detailEditButton: Locator;
+  readonly detailDeleteButton: Locator;
+  readonly openAddApplicationButton: Locator;
+
   constructor(page: Page) {
     this.page = page;
 
@@ -79,6 +88,15 @@ export class DashboardPage {
 
     // Sesión
     this.logoutButton = page.getByRole('button', { name: 'Log Out' });
+
+    // Vista Unificada Master-Detail
+    this.jobDetailView = page.getByTestId('job-detail-view');
+    this.jobFormView = page.getByTestId('job-form-view');
+    this.backToApplicationsButton = page.getByTestId('back-to-applications-btn');
+    this.formCancelButton = page.getByRole('button', { name: 'Cancel' });
+    this.detailEditButton = page.getByTestId('job-detail-view').getByRole('button', { name: /edit/i });
+    this.detailDeleteButton = page.getByTestId('job-detail-view').getByRole('button', { name: /delete/i });
+    this.openAddApplicationButton = page.getByRole('button', { name: /Add Application/i });
   }
 
   // --- Acciones de Navegación e Interacción ---
@@ -107,12 +125,24 @@ export class DashboardPage {
     await this.page.goto('/');
   }
 
+  async openAddApplication() {
+    await this.openAddApplicationButton.click();
+    await this.jobFormView.waitFor({ state: 'visible' });
+  }
+
+  async openJobDetail(company: string) {
+    const card = this.getJobCard(company);
+    await card.click();
+    await this.jobDetailView.waitFor({ state: 'visible' });
+  }
+
   async addJob(job: JobData) {
     if (!(await this.companyInput.isVisible())) {
       const openBtn = this.page.getByRole('button', { name: /Add Application/i });
       if (await openBtn.isVisible()) {
         await openBtn.click();
       }
+      await this.companyInput.waitFor({ state: 'visible' });
     }
     await this.companyInput.fill(job.company);
     await this.positionInput.fill(job.position);
@@ -122,6 +152,8 @@ export class DashboardPage {
       await this.notesInput.fill(job.notes);
     }
     await this.page.getByRole('button', { name: 'Add Job' }).click();
+    await expect(this.companyInput).not.toBeVisible();
+    await expect(this.searchInput).toBeVisible();
   }
 
   getJobCard(company: string): Locator {

@@ -12,7 +12,7 @@ import { LandingPage } from "./components/LandingPage";
 import { Sidebar, type ActiveTab } from "./components/Sidebar";
 import { DashboardView } from "./components/DashboardView";
 import JobModal from "./components/JobModal";
-import JobFormModal from "./components/JobFormModal";
+import JobFormView from "./components/JobFormView";
 import JobDetailView from "./components/JobDetailView";
 import { CalendarPlaceholder } from "./components/CalendarPlaceholder";
 import { TargetHubPlaceholder } from "./components/TargetHubPlaceholder";
@@ -40,7 +40,12 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [editingJob, setEditingJob] = useState<JobApplication | null>(null);
+  interface FormState {
+    mode: "create" | "edit";
+    job?: JobApplication | null;
+    returnTo: "list" | "detail";
+  }
+  const [formState, setFormState] = useState<FormState | null>(null);
   const [filterStatus, setFilterStatus] = useState<FilterValue>("All");
   const [searchText, setSearchText] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("recently_added");
@@ -58,7 +63,7 @@ function App() {
   };
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [selectedDashboardJob, setSelectedDashboardJob] = useState<JobApplication | null>(null);
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  // unified full-screen form state used via formState
   const [selectedJobDetail, setSelectedJobDetail] = useState<JobApplication | null>(null);
 
   const [authNotice, setAuthNotice] = useState<string | null>(null);
@@ -187,7 +192,7 @@ function App() {
       setJobs((currentJobs) =>
         currentJobs.map((job) => (job.id === savedJob.id ? savedJob : job)),
       );
-      setEditingJob(null);
+      return savedJob;
     } catch (err: any) {
       if (err?.message === "SESSION_EXPIRED") {
         handleLogout("Your session has expired due to inactivity. Please log in again.");
@@ -261,7 +266,11 @@ function App() {
       {/* Sidebar fija a la izquierda */}
       <Sidebar
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={(tab) => {
+          setActiveTab(tab);
+          setSelectedJobDetail(null);
+          setFormState(null);
+        }}
         applicationCount={jobs.length}
         userEmail={userEmail || undefined}
         onLogout={() => handleLogout()}
@@ -294,13 +303,14 @@ function App() {
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
-              {(activeTab === "applications" || activeTab === "dashboard") && (
+              {(activeTab === "applications" || activeTab === "dashboard") && !selectedJobDetail && !formState && (
                 <button
                   type="button"
                   data-testid="open-add-job-modal-btn"
                   onClick={() => {
-                    setEditingJob(null);
-                    setIsFormModalOpen(true);
+                    setActiveTab("applications");
+                    setSelectedJobDetail(null);
+                    setFormState({ mode: "create", returnTo: "list" });
                   }}
                   className="px-3.5 sm:px-4 py-2 rounded-xl bg-primary-container text-on-primary-container text-xs font-semibold flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-[0_0_16px_rgba(129,140,248,0.25)] cursor-pointer"
                 >
@@ -336,21 +346,46 @@ function App() {
                   setSelectedJobDetail(job);
                 }}
                 onAddNewJob={() => {
-                  setEditingJob(null);
-                  setIsFormModalOpen(true);
+                  setActiveTab("applications");
+                  setSelectedJobDetail(null);
+                  setFormState({ mode: "create", returnTo: "list" });
                 }}
               />
             )}
 
             {/* Vista 2: Applications (Command Center Completo) */}
             {activeTab === "applications" && (
-              selectedJobDetail ? (
+              formState ? (
+                <JobFormView
+                  mode={formState.mode}
+                  initialJob={formState.job}
+                  onSave={async (jobPayload) => {
+                    if (formState.mode === "edit") {
+                      const updated = await updateJob(jobPayload);
+                      if (formState.returnTo === "detail" && updated) {
+                        setSelectedJobDetail(updated);
+                      } else {
+                        setSelectedJobDetail(null);
+                      }
+                    } else {
+                      await addJob(jobPayload);
+                      setSelectedJobDetail(null);
+                    }
+                    setFormState(null);
+                  }}
+                  onCancel={() => {
+                    if (formState.returnTo === "detail" && formState.job) {
+                      setSelectedJobDetail(formState.job);
+                    }
+                    setFormState(null);
+                  }}
+                />
+              ) : selectedJobDetail ? (
                 <JobDetailView
                   job={selectedJobDetail}
                   onBack={() => setSelectedJobDetail(null)}
                   onEdit={(job) => {
-                    setEditingJob(job);
-                    setIsFormModalOpen(true);
+                    setFormState({ mode: "edit", job, returnTo: "detail" });
                   }}
                   onDelete={(job) => {
                     deleteJob(job.id);
@@ -463,10 +498,12 @@ function App() {
                       jobs={sortedJobs}
                       onDeleteJob={deleteJob}
                       onEditJob={(job) => {
-                        setEditingJob(job);
-                        setIsFormModalOpen(true);
+                        setFormState({ mode: "edit", job, returnTo: "list" });
                       }}
-                      onViewDetails={(job) => setSelectedJobDetail(job)}
+                      onViewDetails={(job) => {
+                        setFormState(null);
+                        setSelectedJobDetail(job);
+                      }}
                     />
                   ) : (
                     <>
@@ -474,10 +511,12 @@ function App() {
                         jobs={sortedJobs.slice((currentPage - 1) * 6, currentPage * 6)}
                         onDeleteJob={deleteJob}
                         onEditJob={(job) => {
-                          setEditingJob(job);
-                          setIsFormModalOpen(true);
+                          setFormState({ mode: "edit", job, returnTo: "list" });
                         }}
-                        onViewDetails={(job) => setSelectedJobDetail(job)}
+                        onViewDetails={(job) => {
+                          setFormState(null);
+                          setSelectedJobDetail(job);
+                        }}
                       />
                       <Pagination
                         currentPage={currentPage}
@@ -520,22 +559,6 @@ function App() {
         </main>
       </div>
 
-      {/* Modal para Crear y Editar Postulaciones */}
-      <JobFormModal
-        isOpen={isFormModalOpen}
-        onClose={() => {
-          setIsFormModalOpen(false);
-          setEditingJob(null);
-        }}
-        onAddJob={addJob}
-        onUpdateJob={(updated) => {
-          updateJob(updated);
-          if (selectedJobDetail?.id === updated.id) {
-            setSelectedJobDetail(updated);
-          }
-        }}
-        editingJob={editingJob}
-      />
 
       {/* Modal de detalle para vacantes inspeccionadas desde el Dashboard */}
       {selectedDashboardJob && (
