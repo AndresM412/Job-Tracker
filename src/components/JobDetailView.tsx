@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { type JobApplication } from "../types/job";
 import StatusBadge from "./StatusBadge";
+import ConfirmDeleteModal from "./ConfirmDeleteModal";
 
 interface JobDetailViewProps {
   job: JobApplication;
@@ -37,6 +38,8 @@ export const JobDetailView: React.FC<JobDetailViewProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   return (
     <div data-testid="job-detail-view" className="space-y-6">
       {/* Botón Volver a la Lista de Aplicaciones */}
@@ -113,15 +116,15 @@ export const JobDetailView: React.FC<JobDetailViewProps> = ({
               onClick={() => onEdit(job)}
               className="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-variant text-on-surface border border-outline-variant/60 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
             >
-              <span className="material-symbols-outlined text-[16px]">edit</span>
+              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">edit</span>
               <span>Edit</span>
             </button>
             <button
               type="button"
-              onClick={() => onDelete(job)}
+              onClick={() => setShowDeleteModal(true)}
               className="px-4 py-2 rounded-xl bg-error-container/20 hover:bg-error-container/40 text-error border border-error/30 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px]">delete</span>
+              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">delete</span>
               <span>Delete</span>
             </button>
           </div>
@@ -185,17 +188,10 @@ export const JobDetailView: React.FC<JobDetailViewProps> = ({
 
           {/* Notas & Intelligence */}
           <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
+            <div className="mb-3">
               <h2 className="text-xs font-mono uppercase tracking-wider text-outline font-semibold">
                 Notes &amp; Intelligence
               </h2>
-              <button
-                type="button"
-                onClick={() => onEdit(job)}
-                className="text-xs text-primary-container font-semibold hover:underline cursor-pointer"
-              >
-                Edit Notes
-              </button>
             </div>
 
             <div className="bg-surface-container-lowest/70 border border-outline-variant/20 rounded-xl p-4 text-xs sm:text-sm text-on-surface-variant whitespace-pre-wrap break-words leading-relaxed">
@@ -203,7 +199,7 @@ export const JobDetailView: React.FC<JobDetailViewProps> = ({
                 renderFormattedNotes(job.notes)
               ) : (
                 <span className="text-outline italic">
-                  No notes recorded yet for this opportunity. Click "Edit Notes" to add salary notes, interview loops, or recruiter contact details.
+                  No notes recorded yet for this opportunity. Click "Edit" to add salary notes, interview loops, or recruiter contact details.
                 </span>
               )}
             </div>
@@ -296,8 +292,21 @@ export const JobDetailView: React.FC<JobDetailViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Modal de Confirmación de Eliminación */}
+      {showDeleteModal && (
+        <ConfirmDeleteModal
+          job={job}
+          onConfirm={() => {
+            onDelete(job);
+            setShowDeleteModal(false);
+          }}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
     </div>
   );
 };
 
 export default JobDetailView;
+
