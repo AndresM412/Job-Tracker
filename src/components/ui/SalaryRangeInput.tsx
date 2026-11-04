@@ -4,7 +4,7 @@ import {
   SUPPORTED_CURRENCIES,
   formatSalaryRange,
   parseSalaryRange,
-} from "../utils/salary";
+} from "../../utils/salary";
 
 type SalaryRangeInputProps = {
   value?: string;

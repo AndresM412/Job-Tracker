@@ -1,4 +1,4 @@
-import { type JobApplication } from "../types/job";
+import { type JobApplication } from "../../types/job";
 
 type StatsBannerProps = {
   jobs: JobApplication[];

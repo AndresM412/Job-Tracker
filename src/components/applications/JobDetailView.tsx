@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { type JobApplication } from "../types/job";
-import StatusBadge from "./StatusBadge";
-import ConfirmDeleteModal from "./ConfirmDeleteModal";
+import { type JobApplication } from "../../types/job";
+import StatusBadge from "../ui/StatusBadge";
+import ConfirmDeleteModal from "../ui/ConfirmDeleteModal";
 
 interface JobDetailViewProps {
   job: JobApplication;

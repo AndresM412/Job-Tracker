@@ -1,21 +1,20 @@
 import { useState, useEffect } from "react";
-import JobList from "./components/JobList";
-import JobTable from "./components/JobTable";
-import Pagination from "./components/Pagination";
+import JobList from "./components/applications/JobList";
+import JobTable from "./components/applications/JobTable";
+import Pagination from "./components/applications/Pagination";
 import { type JobApplication } from "./types/job";
-import StatusDropdown, { type FilterValue } from "./components/filters/StatusDropdown";
-import DateRangeDropdown, { type DateRange } from "./components/filters/DateRangeDropdown";
-import SearchBar from "./components/filters/SearchBar";
-import SortControl, { type SortOrder } from "./components/filters/SortControl";
-import { AuthForm } from "./components/AuthForm";
-import { LandingPage } from "./components/LandingPage";
-import { Sidebar, type ActiveTab } from "./components/Sidebar";
-import { DashboardView } from "./components/DashboardView";
-import JobModal from "./components/JobModal";
-import JobFormView from "./components/JobFormView";
-import JobDetailView from "./components/JobDetailView";
-import { CalendarPlaceholder } from "./components/CalendarPlaceholder";
-import { TargetHubPlaceholder } from "./components/TargetHubPlaceholder";
+import StatusDropdown, { type FilterValue } from "./components/applications/filters/StatusDropdown";
+import DateRangeDropdown, { type DateRange } from "./components/applications/filters/DateRangeDropdown";
+import SearchBar from "./components/applications/filters/SearchBar";
+import SortControl, { type SortOrder } from "./components/applications/filters/SortControl";
+import { AuthForm } from "./components/auth/AuthForm";
+import { LandingPage } from "./components/landing/LandingPage";
+import { Sidebar, type ActiveTab } from "./components/dashboard/Sidebar";
+import { DashboardView } from "./components/dashboard/DashboardView";
+import JobFormView from "./components/applications/JobFormView";
+import JobDetailView from "./components/applications/JobDetailView";
+import { CalendarPlaceholder } from "./components/placeholders/CalendarPlaceholder";
+import { TargetHubPlaceholder } from "./components/placeholders/TargetHubPlaceholder";
 import * as jobsApi from "./services/jobsApi";
 
 type UnauthView = "landing" | "login" | "register";
@@ -62,7 +61,6 @@ function App() {
     localStorage.setItem("job_tracker_view_mode", mode);
   };
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [selectedDashboardJob, setSelectedDashboardJob] = useState<JobApplication | null>(null);
   // unified full-screen form state used via formState
   const [selectedJobDetail, setSelectedJobDetail] = useState<JobApplication | null>(null);
 
@@ -560,13 +558,6 @@ function App() {
       </div>
 
 
-      {/* Modal de detalle para vacantes inspeccionadas desde el Dashboard */}
-      {selectedDashboardJob && (
-        <JobModal
-          job={selectedDashboardJob}
-          onClose={() => setSelectedDashboardJob(null)}
-        />
-      )}
     </div>
   );
 }

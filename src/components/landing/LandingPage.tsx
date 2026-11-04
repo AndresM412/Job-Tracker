@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import StatsBanner from "./StatsBanner";
-import JobList from "./JobList";
-import SearchBar from "./filters/SearchBar";
-import FilterBar, { type FilterValue } from "./filters/FilterBar";
-import SortControl, { type SortOrder } from "./filters/SortControl";
-import { type JobApplication } from "../types/job";
+import StatsBanner from "../dashboard/StatsBanner";
+import JobList from "../applications/JobList";
+import SearchBar from "../applications/filters/SearchBar";
+import FilterBar, { type FilterValue } from "../applications/filters/FilterBar";
+import SortControl, { type SortOrder } from "../applications/filters/SortControl";
+import { type JobApplication } from "../../types/job";
 
 interface LandingPageProps {
   onNavigateToAuth: (mode: "login" | "register") => void;

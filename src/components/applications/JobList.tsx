@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import JobItem from "./JobItem";
-import ConfirmDeleteModal from "./ConfirmDeleteModal";
-import { type JobApplication } from "../types/job";
+import ConfirmDeleteModal from "../ui/ConfirmDeleteModal";
+import { type JobApplication } from "../../types/job";
 
 type JobListProps = {
   jobs: JobApplication[];

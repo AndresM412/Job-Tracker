@@ -1,4 +1,4 @@
-import { type JobStatus } from "../types/job";
+import { type JobStatus } from "../../types/job";
 
 type StatusBadgeProps = {
   status: JobStatus;

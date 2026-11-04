@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { loginApi, registerApi } from "../services/authApi";
+import { loginApi, registerApi } from "../../services/authApi";
 
 interface AuthFormProps {
   onSuccess: (token: string, email: string) => void;

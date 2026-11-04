@@ -1,7 +1,7 @@
 import React from "react";
-import { type JobApplication } from "../types/job";
+import { type JobApplication } from "../../types/job";
 import StatsBanner from "./StatsBanner";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "../ui/StatusBadge";
 
 interface DashboardViewProps {
   jobs: JobApplication[];

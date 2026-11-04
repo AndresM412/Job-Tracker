@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { type JobApplication } from "../types/job";
+import { type JobApplication } from "../../types/job";
 
 type ConfirmDeleteModalProps = {
   job: JobApplication;

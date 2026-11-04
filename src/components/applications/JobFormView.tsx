@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { type JobApplication } from "../types/job";
-import SalaryRangeInput from "./SalaryRangeInput";
+import { type JobApplication } from "../../types/job";
+import SalaryRangeInput from "../ui/SalaryRangeInput";
 
 interface JobFormViewProps {
   mode: "create" | "edit";
