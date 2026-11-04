@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { AuthPage } from './pages/AuthPage';
-import { DashboardPage } from './pages/DashboardPage';
+import { AuthPage } from '../pages/AuthPage';
+import { DashboardPage } from '../pages/DashboardPage';
 
 test.describe('Flujos de Autenticación E2E', () => {
   test('el usuario puede registrarse desde la UI y acceder al dashboard', async ({ page }) => {

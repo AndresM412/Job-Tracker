@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { setupAuthenticatedSession } from './helpers';
-import { DashboardPage } from './pages/DashboardPage';
+import { setupAuthenticatedSession } from '../helpers';
+import { DashboardPage } from '../pages/DashboardPage';
 
 test.describe('Navegación Global entre Vistas (Command Center Tabs)', () => {
   test.beforeEach(async ({ page, request }) => {

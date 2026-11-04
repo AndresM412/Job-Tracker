@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { setupAuthenticatedSession } from "./helpers";
-import { DashboardPage } from "./pages/DashboardPage";
+import { setupAuthenticatedSession } from "../helpers";
+import { DashboardPage } from "../pages/DashboardPage";
 
 test.describe("Flujo Unificado Master-Detail a Pantalla Completa", () => {
   test.beforeEach(async ({ page, request }) => {

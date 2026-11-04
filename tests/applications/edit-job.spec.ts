@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { setupAuthenticatedSession } from './helpers';
-import { DashboardPage } from './pages/DashboardPage';
+import { setupAuthenticatedSession } from '../helpers';
+import { DashboardPage } from '../pages/DashboardPage';
 
 test.beforeEach(async ({ page, request }) => {
   await setupAuthenticatedSession(page, request);

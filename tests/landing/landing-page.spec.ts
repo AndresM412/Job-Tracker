@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { LandingPage } from './pages/LandingPage';
-import { AuthPage } from './pages/AuthPage';
+import { LandingPage } from '../pages/LandingPage';
+import { AuthPage } from '../pages/AuthPage';
 
 test.describe('Landing Page y Flujos de Navegación', () => {
   test('un visitante nuevo ve la landing page con información clave y botones en la esquina', async ({ page }) => {
