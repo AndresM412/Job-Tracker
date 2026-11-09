@@ -87,9 +87,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
 
-      {/* Contenedor Principal del Sidebar */}
+      {/* Contenedor Principal del Sidebar (w-56 para igualar las proporciones de los mockups) */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-surface-container-lowest border-r border-outline-variant/30 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-56 bg-surface-container-lowest border-r border-outline-variant/30 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isOpenMobile ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         }`}
       >

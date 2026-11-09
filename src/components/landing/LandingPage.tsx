@@ -21,8 +21,16 @@ const INITIAL_DEMO_JOBS: JobApplication[] = [
     applicationDate: "2026-09-18",
     salary: "$180,000 - $210,000 USD",
     round: "Round 2 of 4",
-    notes:
-      "Technical loop scheduled with Team Lead. Focus on state management, component architecture, and web performance. https://careers.google.com",
+    notes: [
+      {
+        id: "note-google-1",
+        jobId: "demo-google",
+        title: "Technical Loop Schedule",
+        content:
+          "Technical loop scheduled with Team Lead. Focus on state management, component architecture, and web performance. https://careers.google.com",
+        createdAt: "2026-09-18T10:00:00Z",
+      },
+    ],
   },
   {
     id: "demo-stripe",
@@ -32,8 +40,16 @@ const INITIAL_DEMO_JOBS: JobApplication[] = [
     applicationDate: "2026-09-20",
     salary: "$95,000 - $110,000 USD",
     round: "Decision Pending",
-    notes:
-      "Compensation review deadline next Friday. Includes performance bonus and remote work stipend. https://stripe.com/jobs",
+    notes: [
+      {
+        id: "note-stripe-1",
+        jobId: "demo-stripe",
+        title: "Compensation Review",
+        content:
+          "Compensation review deadline next Friday. Includes performance bonus and remote work stipend. https://stripe.com/jobs",
+        createdAt: "2026-09-20T14:30:00Z",
+      },
+    ],
   },
   {
     id: "demo-spotify",
@@ -43,8 +59,16 @@ const INITIAL_DEMO_JOBS: JobApplication[] = [
     applicationDate: "2026-09-22",
     salary: "€65,000 - €75,000 EUR",
     round: "Awaiting Recruiter Screen",
-    notes:
-      "Applied via employee referral from UX Lead. Sent updated portfolio link. https://spotify.com/careers",
+    notes: [
+      {
+        id: "note-spotify-1",
+        jobId: "demo-spotify",
+        title: "Employee Referral",
+        content:
+          "Applied via employee referral from UX Lead. Sent updated portfolio link. https://spotify.com/careers",
+        createdAt: "2026-09-22T09:15:00Z",
+      },
+    ],
   },
   {
     id: "demo-datadog",
@@ -54,8 +78,16 @@ const INITIAL_DEMO_JOBS: JobApplication[] = [
     applicationDate: "2026-09-15",
     salary: "$120,000 - $140,000 USD",
     round: "Archived",
-    notes:
-      "Position filled internally. Received strong feedback on Playwright architecture, POM pattern, and CI/CD test automation.",
+    notes: [
+      {
+        id: "note-datadog-1",
+        jobId: "demo-datadog",
+        title: "Interview Retrospective",
+        content:
+          "Position filled internally. Received strong feedback on Playwright architecture, POM pattern, and CI/CD test automation.",
+        createdAt: "2026-09-15T16:45:00Z",
+      },
+    ],
   },
 ];
 
@@ -94,8 +126,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     const matchesSearch =
       job.company.toLowerCase().includes(searchText.toLowerCase()) ||
       job.position.toLowerCase().includes(searchText.toLowerCase()) ||
-      (job.notes &&
-        job.notes.toLowerCase().includes(searchText.toLowerCase()));
+      (Array.isArray(job.notes)
+        ? job.notes.some(
+            (n) =>
+              n.title.toLowerCase().includes(searchText.toLowerCase()) ||
+              n.content.toLowerCase().includes(searchText.toLowerCase())
+          )
+        : typeof job.notes === "string" &&
+          job.notes.toLowerCase().includes(searchText.toLowerCase()));
     return matchesStatus && matchesSearch;
   });
 

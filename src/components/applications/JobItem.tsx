@@ -81,7 +81,18 @@ function JobItem({ job, onRequestDelete, onEditJob, onViewDetails }: JobItemProp
           {/* Notes Preview Block */}
           <div className="bg-surface-container-lowest/60 rounded-lg p-2.5 mb-4 text-xs text-on-surface-variant font-normal leading-relaxed min-h-[58px] flex items-center overflow-hidden">
             <p className="line-clamp-2 break-words text-xs">
-              {job.notes || "No additional notes provided for this application."}
+              {Array.isArray(job.notes) && job.notes.length > 0 ? (
+                <>
+                  <span className="font-semibold text-on-surface mr-1">
+                    {job.notes[0].title}:
+                  </span>
+                  {job.notes[0].content}
+                </>
+              ) : typeof job.notes === "string" && job.notes ? (
+                job.notes
+              ) : (
+                "No additional notes provided for this application."
+              )}
             </p>
           </div>
         </div>
