@@ -209,32 +209,23 @@ export const JobDescriptionModal: React.FC<JobDescriptionModalProps> = ({
         {/* Footer Actions Estandarizado (mismos tamaños, paddings y alturas h-9) */}
         <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-outline-variant/20 mt-4 shrink-0">
           {mode === "view" ? (
-            <>
-              <button
-                type="button"
-                onClick={onClose}
-                className="h-9 px-4 rounded-lg border border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-xs font-semibold transition-colors cursor-pointer inline-flex items-center justify-center"
+            <button
+              type="button"
+              data-testid="modal-edit-description-btn"
+              onClick={() => {
+                setDraft(description);
+                setMode("edit");
+              }}
+              className="h-9 px-4 rounded-lg bg-primary-container text-on-primary-container text-xs font-semibold hover:brightness-110 active:scale-95 transition-all shadow-xs cursor-pointer inline-flex items-center justify-center gap-1.5"
+            >
+              <span
+                className="material-symbols-outlined text-[15px]"
+                aria-hidden="true"
               >
-                Close
-              </button>
-              <button
-                type="button"
-                data-testid="modal-edit-description-btn"
-                onClick={() => {
-                  setDraft(description);
-                  setMode("edit");
-                }}
-                className="h-9 px-4 rounded-lg bg-primary-container text-on-primary-container text-xs font-semibold hover:brightness-110 active:scale-95 transition-all shadow-xs cursor-pointer inline-flex items-center justify-center gap-1.5"
-              >
-                <span
-                  className="material-symbols-outlined text-[15px]"
-                  aria-hidden="true"
-                >
-                  edit
-                </span>
-                <span>Update</span>
-              </button>
-            </>
+                edit
+              </span>
+              <span>Update</span>
+            </button>
           ) : (
             <>
               <button

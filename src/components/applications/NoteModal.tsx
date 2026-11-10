@@ -258,14 +258,6 @@ export const NoteModal: React.FC<NoteModalProps> = ({
               <div className="flex items-center gap-2.5">
                 <button
                   type="button"
-                  onClick={onClose}
-                  className="h-9 px-4 rounded-lg border border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-xs font-semibold transition-colors cursor-pointer inline-flex items-center justify-center"
-                >
-                  Close
-                </button>
-
-                <button
-                  type="button"
                   data-testid="modal-edit-note-btn"
                   onClick={() => {
                     setTitle(note?.title || title);

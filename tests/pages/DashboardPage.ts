@@ -53,6 +53,17 @@ export class DashboardPage {
   readonly detailDeleteButton: Locator;
   readonly openAddApplicationButton: Locator;
 
+  // Notas Modulares
+  readonly addNoteButton: Locator;
+  readonly addFirstNoteButton: Locator;
+  readonly noteTitleInput: Locator;
+  readonly noteContentInput: Locator;
+  readonly noteSubmitButton: Locator;
+  readonly noteCancelButton: Locator;
+  readonly notesCountBadge: Locator;
+  readonly notesList: Locator;
+  readonly confirmDeleteNoteButton: Locator;
+
   constructor(page: Page) {
     this.page = page;
 
@@ -94,9 +105,20 @@ export class DashboardPage {
     this.jobFormView = page.getByTestId('job-form-view');
     this.backToApplicationsButton = page.getByTestId('back-to-applications-btn');
     this.formCancelButton = page.getByRole('button', { name: 'Cancel' });
-    this.detailEditButton = page.getByTestId('job-detail-view').getByRole('button', { name: /edit/i });
-    this.detailDeleteButton = page.getByTestId('job-detail-view').getByRole('button', { name: /delete/i });
+    this.detailEditButton = page.getByTestId('detail-edit-job-btn').or(page.getByTestId('job-detail-view').getByRole('button', { name: /^edit$/i }));
+    this.detailDeleteButton = page.getByTestId('detail-delete-job-btn').or(page.getByTestId('job-detail-view').getByRole('button', { name: /^delete$/i }));
     this.openAddApplicationButton = page.getByRole('button', { name: /Add Application/i });
+
+    // Notas Modulares
+    this.addNoteButton = page.getByTestId('add-note-btn');
+    this.addFirstNoteButton = page.getByTestId('add-first-note-btn');
+    this.noteTitleInput = page.getByTestId('note-title-input');
+    this.noteContentInput = page.getByTestId('note-content-input');
+    this.noteSubmitButton = page.getByTestId('note-submit-btn');
+    this.noteCancelButton = page.getByTestId('note-cancel-btn');
+    this.notesCountBadge = page.getByTestId('notes-count-badge');
+    this.notesList = page.getByTestId('notes-list');
+    this.confirmDeleteNoteButton = page.getByTestId('confirm-delete-note-btn');
   }
 
   // --- Acciones de Navegación e Interacción ---
@@ -148,7 +170,7 @@ export class DashboardPage {
     await this.positionInput.fill(job.position);
     await this.statusSelect.selectOption(job.status || 'Applied');
     await this.dateInput.fill(job.date);
-    if (job.notes) {
+    if (job.notes && (await this.notesInput.isVisible())) {
       await this.notesInput.fill(job.notes);
     }
     await this.page.getByRole('button', { name: 'Add Job' }).click();
@@ -207,5 +229,24 @@ export class DashboardPage {
 
   async logout() {
     await this.logoutButton.click();
+  }
+
+  // --- Métodos de Notas Modulares ---
+
+  async addNote(title: string, content: string) {
+    if (await this.addFirstNoteButton.isVisible()) {
+      await this.addFirstNoteButton.click();
+    } else {
+      await this.addNoteButton.click();
+    }
+    await this.noteTitleInput.waitFor({ state: "visible" });
+    await this.noteTitleInput.fill(title);
+    await this.noteContentInput.fill(content);
+    await this.noteSubmitButton.click();
+    await this.noteTitleInput.waitFor({ state: "hidden" });
+  }
+
+  getNoteCard(title: string): Locator {
+    return this.page.locator('[data-testid^="note-card-"]').filter({ hasText: title });
   }
 }
