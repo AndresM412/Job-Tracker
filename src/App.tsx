@@ -276,54 +276,60 @@ function App() {
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
       />
 
-      {/* Contenedor Principal (con padding izquierdo en desktop) */}
-      <div className="flex-1 lg:pl-64 flex flex-col min-h-screen min-w-0">
-        {/* Barra Superior del Contenido */}
-        <header className="sticky top-0 z-30 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-outline-variant/30 px-6 py-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <button
-                type="button"
-                onClick={() => setIsMobileSidebarOpen(true)}
-                className="lg:hidden p-2 rounded-xl bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer shrink-0"
-                aria-label="Open navigation menu"
-              >
-                <span className="material-symbols-outlined text-[20px] block">menu</span>
-              </button>
-              <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-bold text-on-surface tracking-tight truncate">
-                  {viewHeaders[activeTab]?.title || "Command Center"}
-                </h1>
-                <p className="text-xs text-on-surface-variant hidden sm:block truncate">
-                  {viewHeaders[activeTab]?.subtitle}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 shrink-0">
-              {(activeTab === "applications" || activeTab === "dashboard") && !selectedJobDetail && !formState && (
+      {/* Contenedor Principal (con padding izquierdo en desktop adaptado al ancho w-56 del sidebar) */}
+      <div className="flex-1 lg:pl-56 flex flex-col min-h-screen min-w-0">
+        {/* Barra Superior del Contenido (oculta en vista detalle para aprovechar toda la pantalla sin scroll) */}
+        {!selectedJobDetail && (
+          <header className="sticky top-0 z-30 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-outline-variant/30 px-6 py-4">
+            <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
                 <button
                   type="button"
-                  data-testid="open-add-job-modal-btn"
-                  onClick={() => {
-                    setActiveTab("applications");
-                    setSelectedJobDetail(null);
-                    setFormState({ mode: "create", returnTo: "list" });
-                  }}
-                  className="px-3.5 sm:px-4 py-2 rounded-xl bg-primary-container text-on-primary-container text-xs font-semibold flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-[0_0_16px_rgba(129,140,248,0.25)] cursor-pointer"
+                  onClick={() => setIsMobileSidebarOpen(true)}
+                  className="lg:hidden p-2 rounded-xl bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer shrink-0"
+                  aria-label="Open navigation menu"
                 >
-                  <span className="material-symbols-outlined text-[17px]">add_circle</span>
-                  <span className="hidden sm:inline">Add Application</span>
-                  <span className="sm:hidden">Add</span>
+                  <span className="material-symbols-outlined text-[20px] block">menu</span>
                 </button>
-              )}
-            </div>
-          </div>
-        </header>
+                <div className="min-w-0">
+                  <h1 className="text-lg sm:text-xl font-bold text-on-surface tracking-tight truncate">
+                    {viewHeaders[activeTab]?.title || "Command Center"}
+                  </h1>
+                  <p className="text-xs text-on-surface-variant hidden sm:block truncate">
+                    {viewHeaders[activeTab]?.subtitle}
+                  </p>
+                </div>
+              </div>
 
-        {/* Contenido Principal de las Vistas */}
-        <main className="flex-1 w-full bg-surface">
-          <div className="max-w-7xl mx-auto px-6 py-6">
+              <div className="flex items-center gap-3 shrink-0">
+                {(activeTab === "applications" || activeTab === "dashboard") && !selectedJobDetail && !formState && (
+                  <button
+                    type="button"
+                    data-testid="open-add-job-modal-btn"
+                    onClick={() => {
+                      setActiveTab("applications");
+                      setSelectedJobDetail(null);
+                      setFormState({ mode: "create", returnTo: "list" });
+                    }}
+                    className="px-3.5 sm:px-4 py-2 rounded-xl bg-primary-container text-on-primary-container text-xs font-semibold flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-[0_0_16px_rgba(129,140,248,0.25)] cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[17px]">add_circle</span>
+                    <span className="hidden sm:inline">Add Application</span>
+                    <span className="sm:hidden">Add</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </header>
+        )}
+
+        {/* Contenido Principal de las Vistas (con soporte elástico para pantallas grandes y portátiles) */}
+        <main className="flex-1 w-full bg-surface flex flex-col min-h-0">
+          <div
+            className={`max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0 ${
+              selectedJobDetail ? "px-4 sm:px-6 py-2 sm:py-2.5" : "px-6 py-6"
+            }`}
+          >
             {error && (
               <div className="bg-error-container/20 border border-error/40 text-error text-sm rounded-xl p-3.5 mb-6">
                 {error}
@@ -388,6 +394,12 @@ function App() {
                   onDelete={(job) => {
                     deleteJob(job.id);
                     setSelectedJobDetail(null);
+                  }}
+                  onJobUpdated={(updated) => {
+                    setSelectedJobDetail(updated);
+                    setJobs((prev) =>
+                      prev.map((j) => (j.id === updated.id ? updated : j))
+                    );
                   }}
                 />
               ) : (

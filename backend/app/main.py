@@ -23,6 +23,9 @@ app.add_middleware(
 )
 
 
+# --- JOBS ENDPOINTS ---
+
+
 @app.get("/jobs", response_model=List[schemas.JobApplicationResponse])
 def read_jobs(
     db: Session = Depends(get_db),
@@ -65,6 +68,64 @@ def delete_job(
     return {"message": "Job deleted successfully"}
 
 
+# --- NOTES ENDPOINTS ---
+
+
+@app.get("/jobs/{job_id}/notes", response_model=List[schemas.JobNoteResponse])
+def read_job_notes(
+    job_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    notes = crud.get_job_notes(db, job_id, user_id=current_user.id)
+    if notes is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return notes
+
+
+@app.post("/jobs/{job_id}/notes", response_model=schemas.JobNoteResponse)
+def create_job_note(
+    job_id: str,
+    note: schemas.JobNoteCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    db_note = crud.create_job_note(db, job_id, note, user_id=current_user.id)
+    if db_note is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return db_note
+
+
+@app.put("/jobs/{job_id}/notes/{note_id}", response_model=schemas.JobNoteResponse)
+def update_job_note(
+    job_id: str,
+    note_id: str,
+    note: schemas.JobNoteUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    db_note = crud.update_job_note(db, job_id, note_id, note, user_id=current_user.id)
+    if db_note is None:
+        raise HTTPException(status_code=404, detail="Note or Job not found")
+    return db_note
+
+
+@app.delete("/jobs/{job_id}/notes/{note_id}")
+def delete_job_note(
+    job_id: str,
+    note_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    db_note = crud.delete_job_note(db, job_id, note_id, user_id=current_user.id)
+    if db_note is None:
+        raise HTTPException(status_code=404, detail="Note or Job not found")
+    return {"message": "Note deleted successfully"}
+
+
+# --- AUTH ENDPOINTS ---
+
+
 @app.post("/register", response_model=schemas.UserResponse)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, user.email)
@@ -76,11 +137,13 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 @app.post("/login", response_model=schemas.Token)
 def user_login(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     db_user = crud.get_user_by_email(db, form_data.username)
 
-    if db_user is None or not auth.verify_password(form_data.password, db_user.hashed_password):
+    if db_user is None or not auth.verify_password(
+        form_data.password, db_user.hashed_password
+    ):
         raise HTTPException(status_code=401, detail="Incorrect email or password")
 
     access_token = auth.create_access_token(data={"sub": str(db_user.id)})

@@ -92,14 +92,21 @@ function JobTable({ jobs, onDeleteJob, onEditJob, onViewDetails }: JobTableProps
                       >
                         {job.company}
                       </div>
-                      {job.notes && (
+                      {Array.isArray(job.notes) && job.notes.length > 0 ? (
+                        <div
+                          className="text-[11px] text-on-surface-variant/70 truncate max-w-[180px] sm:max-w-[220px]"
+                          title={`${job.notes[0].title}: ${job.notes[0].content}`}
+                        >
+                          {job.notes[0].title}
+                        </div>
+                      ) : typeof job.notes === "string" && job.notes ? (
                         <div
                           className="text-[11px] text-on-surface-variant/70 truncate max-w-[180px] sm:max-w-[220px]"
                           title={job.notes}
                         >
                           {job.notes}
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 </td>

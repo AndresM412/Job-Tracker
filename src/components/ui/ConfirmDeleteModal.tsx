@@ -12,8 +12,11 @@ function ConfirmDeleteModal({
   onConfirm,
   onCancel,
 }: ConfirmDeleteModalProps) {
-  // Cierre accesible al presionar la tecla Escape
+  // Cierre accesible al presionar la tecla Escape y bloqueo de scroll de fondo
   useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onCancel();
@@ -22,6 +25,7 @@ function ConfirmDeleteModal({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => {
+      document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [onCancel]);
@@ -29,7 +33,7 @@ function ConfirmDeleteModal({
   return (
     <div
       data-testid="confirm-delete-modal-backdrop"
-      className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
       onClick={onCancel}
     >
       <div

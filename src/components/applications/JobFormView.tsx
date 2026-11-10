@@ -21,7 +21,6 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
   const [applicationDate, setApplicationDate] = useState("");
   const [salary, setSalary] = useState<string | undefined>(undefined);
   const [round, setRound] = useState("");
-  const [notes, setNotes] = useState("");
   const dateInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -32,7 +31,6 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
       setApplicationDate(initialJob.applicationDate);
       setSalary(initialJob.salary);
       setRound(initialJob.round ?? "");
-      setNotes(initialJob.notes ?? "");
     } else {
       setCompany("");
       setPosition("");
@@ -40,7 +38,6 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
       setApplicationDate(new Date().toISOString().split("T")[0]);
       setSalary(undefined);
       setRound("");
-      setNotes("");
     }
   }, [mode, initialJob]);
 
@@ -62,8 +59,9 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
       applicationDate,
       salary,
       round: round.trim() === "" ? undefined : round.trim(),
-      notes: notes.trim() === "" ? undefined : notes.trim(),
-      created_at: mode === "edit" && initialJob ? initialJob.created_at : undefined,
+      notes: initialJob?.notes,
+      createdAt:
+        mode === "edit" && initialJob ? initialJob.createdAt : undefined,
     };
 
     onSave(payload);
@@ -80,7 +78,7 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
   };
 
   return (
-    <div data-testid="job-form-view" className="space-y-6 animate-fadeIn">
+    <div data-testid="job-form-view" className="space-y-6">
       {/* Botón Volver a la Lista de Aplicaciones */}
       <div>
         <button
@@ -89,7 +87,10 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
           data-testid="back-to-applications-btn"
           className="inline-flex items-center gap-2 text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-surface-container px-3 py-1.5 rounded-lg border border-outline-variant/30 transition-all cursor-pointer group"
         >
-          <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-0.5 transition-transform">
+          <span
+            className="material-symbols-outlined text-[16px] group-hover:-translate-x-0.5 transition-transform"
+            aria-hidden="true"
+          >
             arrow_back
           </span>
           <span>Back to Applications</span>
@@ -98,52 +99,46 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
 
       {/* Hero Header Card */}
       <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-6 sm:p-7 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-          <div className="flex items-start gap-4">
-            {/* Emblema con icono o inicial */}
-            <div className="w-14 h-14 rounded-2xl bg-surface-container-high border border-outline-variant/60 flex items-center justify-center font-bold text-2xl text-on-surface shrink-0 shadow-[0_0_20px_rgba(129,140,248,0.15)]">
-              {mode === "edit" && initialJob?.company ? (
-                initialJob.company.charAt(0).toUpperCase()
-              ) : (
-                <span className="material-symbols-outlined text-primary-container text-[28px]">
-                  add_circle
-                </span>
-              )}
-            </div>
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-surface-container-high border border-outline-variant/60 flex items-center justify-center font-bold text-2xl text-on-surface shrink-0 shadow-[0_0_20px_rgba(129,140,248,0.15)]">
+            <span
+              className="material-symbols-outlined text-[28px] text-primary-container"
+              aria-hidden="true"
+            >
+              {mode === "create" ? "add_circle" : "edit_document"}
+            </span>
+          </div>
 
-            <div>
-              <div className="flex items-center gap-2.5 mb-1.5">
-                <h1 className="text-2xl font-bold text-on-surface tracking-tight">
-                  {mode === "edit"
-                    ? `Edit Application: ${initialJob?.company || ""}`
-                    : "Stage New Application"}
-                </h1>
-                <span className="px-2.5 py-0.5 rounded-full bg-surface-container text-primary-container font-mono text-[10px] uppercase tracking-wider border border-primary-container/30">
-                  {mode === "edit" ? "Edit Mode" : "New Record"}
-                </span>
-              </div>
-              <p className="text-sm font-medium text-on-surface-variant">
-                {mode === "edit"
-                  ? "Update opportunity details, interview status, compensation, and debrief notes."
-                  : "Enter the opportunity details below to capture it in your tracking pipeline."}
-              </p>
+          <div>
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <h1 className="text-2xl font-bold text-on-surface tracking-tight">
+                {mode === "create" ? "Log New Application" : "Edit Application"}
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full bg-primary-container/20 text-primary-container text-xs font-semibold border border-primary-container/30">
+                {mode === "create" ? "Create Mode" : "Edit Mode"}
+              </span>
             </div>
+            <p className="text-sm font-medium text-on-surface-variant">
+              {mode === "create"
+                ? "Record a new job opportunity to track your pipeline progression."
+                : `Update application details for ${initialJob?.company || "this position"}.`}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Formulario Principal en Pantalla Completa */}
-      <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-6 sm:p-7 shadow-sm">
+      {/* Form Card */}
+      <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-6 sm:p-8 shadow-sm">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Sección 1: Datos Principales de la Vacante */}
+          {/* Sección 1: Información Básica */}
           <div>
             <h2 className="text-xs font-mono uppercase tracking-wider text-outline font-semibold mb-4">
-              Role &amp; Opportunity Information
+              Basic Information
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-on-surface-variant mb-1.5">
-                  Company <span className="text-error">*</span>
+                  Company Name <span className="text-error">*</span>
                 </label>
                 <input
                   type="text"
@@ -152,7 +147,7 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
                   placeholder="Company"
                   maxLength={30}
                   required
-                  className="w-full bg-surface-container-lowest text-on-surface text-sm px-4 py-2.5 rounded-xl border border-outline-variant/40 focus:border-primary-container/80 focus:outline-none transition-all"
+                  className="w-full bg-surface-container-lowest text-on-surface text-sm px-4 py-2.5 rounded-xl border border-outline-variant/40 focus:border-primary-container/80 focus:outline-none transition-all placeholder:text-outline-variant"
                 />
               </div>
 
@@ -165,42 +160,38 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
                   value={position}
                   onChange={(e) => setPosition(e.target.value)}
                   placeholder="Position"
-                  maxLength={30}
+                  maxLength={40}
                   required
-                  className="w-full bg-surface-container-lowest text-on-surface text-sm px-4 py-2.5 rounded-xl border border-outline-variant/40 focus:border-primary-container/80 focus:outline-none transition-all"
+                  className="w-full bg-surface-container-lowest text-on-surface text-sm px-4 py-2.5 rounded-xl border border-outline-variant/40 focus:border-primary-container/80 focus:outline-none transition-all placeholder:text-outline-variant"
                 />
               </div>
             </div>
           </div>
 
-          {/* Sección 2: Estado y Fecha */}
+          {/* Sección 2: Estado y Etapas */}
           <div>
             <h2 className="text-xs font-mono uppercase tracking-wider text-outline font-semibold mb-4">
-              Status &amp; Timeline
+              Application Status &amp; Stage
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-on-surface-variant mb-1.5">
                   Current Status <span className="text-error">*</span>
                 </label>
-                <div className="relative">
-                  <select
-                    data-testid="status-select"
-                    value={status}
-                    onChange={(e) =>
-                      setStatus(e.target.value as JobApplication["status"])
-                    }
-                    className="w-full bg-surface-container-lowest text-on-surface text-sm px-4 py-2.5 rounded-xl border border-outline-variant/40 focus:border-primary-container/80 focus:outline-none appearance-none transition-all cursor-pointer"
-                  >
-                    <option value="Applied">Applied</option>
-                    <option value="Interview">Interview</option>
-                    <option value="Offer">Offer</option>
-                    <option value="Rejected">Rejected</option>
-                  </select>
-                  <span className="material-symbols-outlined text-outline pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[18px]">
-                    expand_more
-                  </span>
-                </div>
+                <select
+                  data-testid="status-select"
+                  value={status}
+                  onChange={(e) =>
+                    setStatus(e.target.value as JobApplication["status"])
+                  }
+                  required
+                  className="w-full bg-surface-container-lowest text-on-surface text-sm px-4 py-2.5 rounded-xl border border-outline-variant/40 focus:border-primary-container/80 focus:outline-none transition-all cursor-pointer"
+                >
+                  <option value="Applied">Applied</option>
+                  <option value="Interview">Interview</option>
+                  <option value="Offer">Offer</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
               </div>
 
               <div>
@@ -214,36 +205,36 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
                     value={applicationDate}
                     onChange={(e) => setApplicationDate(e.target.value)}
                     required
-                    className="w-full bg-surface-container-lowest text-on-surface text-sm px-4 py-2.5 pr-11 rounded-xl border border-outline-variant/40 focus:border-primary-container/80 focus:outline-none transition-all cursor-text [color-scheme:dark]"
+                    className="w-full bg-surface-container-lowest text-on-surface text-sm pl-4 pr-11 py-2.5 rounded-xl border border-outline-variant/40 focus:border-primary-container/80 focus:outline-none transition-all [color-scheme:dark]"
                   />
                   <button
                     type="button"
                     onClick={handleOpenDatePicker}
+                    className="absolute right-2.5 p-1.5 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer flex items-center justify-center"
                     title="Open calendar picker"
                     aria-label="Open calendar picker"
-                    className="absolute right-2.5 p-1.5 rounded-lg text-outline hover:text-primary-container hover:bg-surface-container transition-all cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[18px] block pointer-events-none">
+                    <span
+                      className="material-symbols-outlined text-[18px]"
+                      aria-hidden="true"
+                    >
                       calendar_month
                     </span>
                   </button>
                 </div>
-                <p className="text-[11px] text-outline mt-1 font-mono">
-                  Type manually (YYYY-MM-DD) or click the calendar icon to pick a date.
-                </p>
               </div>
             </div>
           </div>
 
-          {/* Sección 3: Compensación y Etapa */}
+          {/* Sección 3: Compensación y Ronda */}
           <div>
             <h2 className="text-xs font-mono uppercase tracking-wider text-outline font-semibold mb-4">
-              Compensation &amp; Interview Stage
+              Compensation &amp; Interview Details
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-on-surface-variant mb-1.5">
-                  Compensation Band (Optional)
+                  Compensation (Optional)
                 </label>
                 <SalaryRangeInput value={salary} onChange={setSalary} />
               </div>
@@ -264,34 +255,6 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
             </div>
           </div>
 
-          {/* Sección 4: Notas y Detalles */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-on-surface-variant">
-                Notes &amp; Intelligence (Optional)
-              </label>
-              <span
-                className={`text-[11px] font-mono ${
-                  notes.length >= 3800
-                    ? "text-error"
-                    : notes.length >= 3200
-                    ? "text-tertiary"
-                    : "text-outline"
-                }`}
-              >
-                {notes.length}/4000
-              </span>
-            </div>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Notes (optional) — job link, salary band, recruiter contact, or notes..."
-              rows={4}
-              maxLength={4000}
-              className="w-full bg-surface-container-lowest text-on-surface text-sm p-4 rounded-xl border border-outline-variant/40 focus:border-primary-container/80 focus:outline-none transition-all resize-y"
-            />
-          </div>
-
           {/* Botones de Acción: tamaños y proporciones armónicas */}
           <div className="flex items-center justify-end gap-3 pt-5 border-t border-outline-variant/30">
             <button
@@ -299,7 +262,10 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
               onClick={onCancel}
               className="px-5 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-on-surface border border-outline-variant/60 text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95"
             >
-              <span className="material-symbols-outlined text-[16px] text-outline">
+              <span
+                className="material-symbols-outlined text-[16px] text-outline"
+                aria-hidden="true"
+              >
                 close
               </span>
               <span>Cancel</span>
@@ -309,7 +275,10 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
               disabled={!isFormValid}
               className="px-5 py-2.5 bg-primary-container text-surface hover:brightness-110 active:scale-95 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(129,140,248,0.35)] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px]">
+              <span
+                className="material-symbols-outlined text-[16px]"
+                aria-hidden="true"
+              >
                 {mode === "edit" ? "save" : "add_circle"}
               </span>
               <span>{mode === "edit" ? "Save Changes" : "Add Job"}</span>
@@ -322,4 +291,3 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
 };
 
 export default JobFormView;
-

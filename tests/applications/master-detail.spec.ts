@@ -19,8 +19,9 @@ test.describe("Flujo Unificado Master-Detail a Pantalla Completa", () => {
     // ASSERT: vista de formulario unificada a pantalla completa visible
     await expect(dashboard.jobFormView).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Stage New Application" }),
+      page.getByRole("heading", { name: "Log New Application" }),
     ).toBeVisible();
+    await expect(page.getByText("Create Mode")).toBeVisible();
     await expect(dashboard.companyInput).toBeVisible();
     await expect(dashboard.positionInput).toBeVisible();
     await expect(dashboard.statusSelect).toBeVisible();
@@ -82,8 +83,10 @@ test.describe("Flujo Unificado Master-Detail a Pantalla Completa", () => {
     await dashboard.detailEditButton.click();
     await expect(dashboard.jobFormView).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Edit Application: Figma" }),
+      page.getByRole("heading", { name: "Edit Application" }),
     ).toBeVisible();
+    await expect(page.getByText("Edit Mode")).toBeVisible();
+    await expect(page.getByText("Update application details for Figma.")).toBeVisible();
     await expect(dashboard.companyInput).toHaveValue("Figma");
     await expect(dashboard.positionInput).toHaveValue("Product Designer");
 
