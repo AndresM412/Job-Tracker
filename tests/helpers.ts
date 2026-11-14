@@ -61,3 +61,32 @@ export async function setupAuthenticatedSession(page: Page, request: APIRequestC
   // Limpiar todos los trabajos previos del usuario
   await clearAllJobs(request);
 }
+
+export async function deleteUserByCredentials(
+  request: APIRequestContext,
+  email: string,
+  password: string = 'Password123!'
+) {
+  try {
+    const loginResponse = await request.post(`${API_URL}/login`, {
+      form: {
+        username: email,
+        password: password,
+      },
+    });
+
+    if (!loginResponse.ok()) return;
+
+    const data = await loginResponse.json();
+    const token = data.access_token;
+    if (!token) return;
+
+    await request.delete(`${API_URL}/users/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  } catch (error) {
+    console.error(`Error eliminando usuario de prueba ${email}:`, error);
+  }
+}

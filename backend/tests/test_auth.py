@@ -55,3 +55,57 @@ def test_login_wrong_password_fails(client):
     )
     assert response.status_code == 401
     assert response.json()["detail"] == "Incorrect email or password"
+
+
+def test_delete_current_user_unauthorized(client):
+    # Intentar eliminar usuario sin token debe devolver 401
+    response = client.delete("/users/me")
+    assert response.status_code == 401
+
+
+def test_delete_current_user_success(client):
+    email = "delete_me@example.com"
+    password = "password123"
+
+    # Registrar usuario
+    reg_res = client.post("/register", json={"email": email, "password": password})
+    assert reg_res.status_code == 200
+
+    # Iniciar sesión y obtener token
+    login_res = client.post(
+        "/login",
+        data={"username": email, "password": password},
+    )
+    token = login_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Crear una postulación con nota inicial para verificar borrado en cascada
+    job_res = client.post(
+        "/jobs",
+        json={
+            "company": "Cascade Tech",
+            "position": "SDET",
+            "status": "Applied",
+            "application_date": "2026-11-13",
+            "notes": "Testing cascade deletion",
+        },
+        headers=headers,
+    )
+    assert job_res.status_code == 200
+
+    # Eliminar al usuario a través del endpoint /users/me
+    delete_res = client.delete("/users/me", headers=headers)
+    assert delete_res.status_code == 200
+    assert delete_res.json()["message"] == "User deleted successfully"
+
+    # Verificar que el token ya no sea válido porque el usuario ya no existe
+    verify_res = client.get("/jobs", headers=headers)
+    assert verify_res.status_code == 401
+
+    # Verificar que el usuario no pueda volver a loguearse
+    relogin_res = client.post(
+        "/login",
+        data={"username": email, "password": password},
+    )
+    assert relogin_res.status_code == 401
+
