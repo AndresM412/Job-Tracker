@@ -142,9 +142,12 @@ test.describe('Notas Modulares con Título (Roadmap Item 4)', () => {
     await page.getByTitle('Clear search').click();
     await expect(dashboard.getNoteCard('HR Benefits Summary')).toBeVisible();
 
-    // 4. ACT: Clic en la tarjeta de la nota para abrir el modal unificado en modo lectura
+    // 4. ACT: Clic en cualquier parte de la tarjeta no abre el modal; solo el botón 'Read note' lo abre
     await dashboard.getNoteCard('Technical Interview Loop').click();
     const detailModal = page.getByTestId('note-detail-modal');
+    await expect(detailModal).not.toBeVisible();
+
+    await dashboard.getNoteCard('Technical Interview Loop').getByRole('button', { name: /Read note/i }).click();
     await expect(detailModal).toBeVisible();
     await expect(detailModal).toContainText('Coding challenge on asynchronous streams');
 

@@ -1,4 +1,4 @@
-export function CalendarPlaceholder() {
+export function CalendarPlaceholderView() {
   return (
     <div
       data-testid="view-calendar-placeholder"
@@ -41,4 +41,5 @@ export function CalendarPlaceholder() {
   );
 }
 
-export default CalendarPlaceholder;
+export const CalendarPlaceholder = CalendarPlaceholderView;
+export default CalendarPlaceholderView;

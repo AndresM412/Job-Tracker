@@ -68,12 +68,12 @@ function ConfirmDeleteModal({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 mt-6 pt-3 border-t border-outline-variant/20">
+        <div className="flex justify-end gap-2.5 mt-6 pt-3 border-t border-outline-variant/20">
           <button
             type="button"
             data-testid="cancel-delete-btn"
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg text-sm font-medium border border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
+            className="cursor-pointer inline-flex items-center justify-center px-4 py-2 rounded-xl border border-outline-variant/40 bg-surface-container-high/60 text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-xs font-semibold active:scale-95 transition-all duration-150"
           >
             Cancel
           </button>
@@ -81,7 +81,7 @@ function ConfirmDeleteModal({
             type="button"
             data-testid="confirm-delete-btn"
             onClick={onConfirm}
-            className="px-4 py-2 rounded-lg text-sm font-semibold bg-error text-on-error hover:brightness-110 active:scale-95 transition-all shadow-md shadow-error/20 cursor-pointer"
+            className="cursor-pointer inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl font-semibold text-xs bg-error text-on-error hover:bg-error/90 hover:shadow-[0_0_16px_rgba(255,180,171,0.35)] active:scale-95 transition-all duration-150"
           >
             Delete
           </button>

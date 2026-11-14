@@ -245,9 +245,9 @@ export const NoteModal: React.FC<NoteModalProps> = ({
                       onClose();
                       onDelete(note);
                     }}
-                    className="h-9 px-4 rounded-lg bg-error-container/20 hover:bg-error-container/30 text-error border border-error/30 text-xs font-semibold transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
+                    className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-outline-variant/40 bg-surface-container-high/60 hover:border-error/50 hover:bg-error-container/20 hover:text-error text-on-surface-variant text-xs font-semibold active:scale-95 transition-all duration-150"
                   >
-                    <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                    <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                       delete
                     </span>
                     <span>Delete</span>
@@ -264,9 +264,9 @@ export const NoteModal: React.FC<NoteModalProps> = ({
                     setContent(note?.content || content);
                     setMode("edit");
                   }}
-                  className="h-9 px-4 rounded-lg bg-primary-container text-on-primary-container text-xs font-semibold hover:brightness-110 active:scale-95 transition-all shadow-xs cursor-pointer inline-flex items-center justify-center gap-1.5"
+                  className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-semibold shadow-[0_0_12px_rgba(129,140,248,0.25)] hover:bg-[#e0e0ff] hover:shadow-[0_0_18px_rgba(189,194,255,0.55)] active:scale-95 transition-all duration-150"
                 >
-                  <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                     edit
                   </span>
                   <span>Edit</span>
@@ -340,14 +340,14 @@ export const NoteModal: React.FC<NoteModalProps> = ({
               </div>
             </div>
 
-            {/* Edit Mode Footer Estandarizado (mismos tamaños h-9 y estilos idénticos a JobDescriptionModal) */}
+            {/* Edit Mode Footer Estandarizado (mismos estilos estandarizados con hover luminoso) */}
             <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-outline-variant/20 mt-4 shrink-0">
               <button
                 type="button"
                 data-testid="note-cancel-btn"
                 onClick={handleCancelEdit}
                 disabled={isSubmitting}
-                className="h-9 px-4 rounded-lg border border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-xs font-semibold transition-colors cursor-pointer inline-flex items-center justify-center disabled:opacity-50"
+                className="cursor-pointer inline-flex items-center justify-center px-4 py-2 rounded-xl border border-outline-variant/40 bg-surface-container-high/60 text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-xs font-semibold active:scale-95 transition-all duration-150 disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -355,9 +355,9 @@ export const NoteModal: React.FC<NoteModalProps> = ({
                 type="submit"
                 data-testid="note-submit-btn"
                 disabled={isSubmitting}
-                className="h-9 px-4 rounded-lg bg-primary-container text-on-primary-container text-xs font-semibold hover:brightness-110 active:scale-95 transition-all shadow-xs cursor-pointer inline-flex items-center justify-center gap-1.5 disabled:opacity-50"
+                className="cursor-pointer inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-semibold shadow-[0_0_12px_rgba(129,140,248,0.25)] hover:bg-[#e0e0ff] hover:shadow-[0_0_18px_rgba(189,194,255,0.55)] active:scale-95 transition-all duration-150 disabled:opacity-50"
               >
-                <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                   check
                 </span>
                 <span>{isSubmitting ? "Saving..." : note ? "Save Changes" : "Create Note"}</span>
