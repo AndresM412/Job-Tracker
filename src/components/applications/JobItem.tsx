@@ -1,6 +1,9 @@
 import { type JobApplication } from "../../types/job";
 import Card from "../ui/Card";
 import StatusBadge from "../ui/StatusBadge";
+import StarRating from "../ui/StarRating";
+import WorkModeBadge from "../ui/WorkModeBadge";
+import { getSafeHttpUrl } from "../../utils/urlUtils";
 
 const spineClassMap: Record<string, string> = {
   Applied: "bg-tertiary",
@@ -21,14 +24,20 @@ type JobItemProps = {
   onRequestDelete: (job: JobApplication) => void;
   onEditJob: (job: JobApplication) => void;
   onViewDetails?: (job: JobApplication) => void;
+  onPriorityChange?: (jobId: string, priority: number) => void;
 };
 
-function JobItem({ job, onRequestDelete, onEditJob, onViewDetails }: JobItemProps) {
+function JobItem({
+  job,
+  onRequestDelete,
+  onEditJob,
+  onViewDetails,
+  onPriorityChange,
+}: JobItemProps) {
+  const safeJobUrl = getSafeHttpUrl(job.jobUrl);
+
   return (
-    <div
-      onClick={() => onViewDetails?.(job)}
-      className="cursor-pointer h-full"
-    >
+    <div onClick={() => onViewDetails?.(job)} className="cursor-pointer h-full">
       <Card
         spineClass={spineClassMap[job.status] || "bg-primary-container"}
         glowClass={statusGlowClass[job.status]}
@@ -36,7 +45,7 @@ function JobItem({ job, onRequestDelete, onEditJob, onViewDetails }: JobItemProp
       >
         <div>
           {/* Title & Status Row */}
-          <div className="flex items-start justify-between gap-3 mb-2.5">
+          <div className="flex items-start justify-between gap-3 mb-2">
             <div className="min-w-0">
               <h2 className="text-[1.125rem] font-bold text-on-surface tracking-tight leading-snug truncate">
                 {job.company}
@@ -45,11 +54,24 @@ function JobItem({ job, onRequestDelete, onEditJob, onViewDetails }: JobItemProp
                 {job.position}
               </p>
             </div>
-            <StatusBadge status={job.status} />
+            <div className="flex flex-col items-end gap-1.5 shrink-0">
+              <StatusBadge status={job.status} />
+              <StarRating
+                value={job.priority}
+                onChange={
+                  onPriorityChange
+                    ? (nextPriority) => onPriorityChange(job.id, nextPriority)
+                    : undefined
+                }
+                size="xs"
+                stopPropagation
+                testIdPrefix="card-star"
+              />
+            </div>
           </div>
 
-          {/* Date & Salary Row */}
-          <div className="flex items-center gap-2 mb-3 text-on-surface-variant/80 text-xs min-w-0">
+          {/* Date, Salary & External Link Row */}
+          <div className="flex items-center gap-2 mb-2 text-on-surface-variant/80 text-xs min-w-0 flex-wrap">
             <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
               <svg
                 className="w-3.5 h-3.5 text-on-surface-variant/70 shrink-0"
@@ -70,13 +92,53 @@ function JobItem({ job, onRequestDelete, onEditJob, onViewDetails }: JobItemProp
                 <span className="shrink-0 text-outline-variant/60">•</span>
                 <span
                   title={job.salary}
-                  className="px-2 py-0.5 rounded bg-surface-container-highest font-semibold text-[11px] leading-tight text-on-surface truncate whitespace-nowrap min-w-0 max-w-[170px]"
+                  className="px-2 py-0.5 rounded bg-surface-container-highest font-semibold text-[11px] leading-tight text-on-surface truncate whitespace-nowrap min-w-0 max-w-[155px]"
                 >
                   {job.salary}
                 </span>
               </>
             )}
+            {safeJobUrl && (
+              <a
+                href={safeJobUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                data-testid="card-job-url-link"
+                title={`Open job posting: ${safeJobUrl}`}
+                aria-label={`Open job posting for ${job.company}`}
+                className="ml-auto inline-flex items-center gap-0.5 text-[11px] font-medium text-primary-container hover:brightness-125 transition-colors shrink-0"
+              >
+                <span
+                  className="material-symbols-outlined text-[18px]"
+                  aria-hidden="true"
+                >
+                  open_in_new
+                </span>
+              </a>
+            )}
           </div>
+
+          {/* Location & Work Mode Row */}
+          {(job.location || job.workMode) && (
+            <div className="flex items-center gap-2 mb-2.5 text-[11px] text-on-surface-variant min-w-0 flex-wrap">
+              {job.location && (
+                <span
+                  className="inline-flex items-center gap-1 min-w-0 max-w-[190px]"
+                  title={job.location}
+                >
+                  <span
+                    className="material-symbols-outlined text-[13px] text-outline shrink-0"
+                    aria-hidden="true"
+                  >
+                    location_on
+                  </span>
+                  <span className="truncate">{job.location}</span>
+                </span>
+              )}
+              {job.workMode && <WorkModeBadge mode={job.workMode} size="xs" />}
+            </div>
+          )}
 
           {/* Notes Preview Block */}
           <div className="bg-surface-container-lowest/60 rounded-lg p-2.5 mb-4 text-xs text-on-surface-variant font-normal leading-relaxed min-h-[58px] flex items-center overflow-hidden">
@@ -105,20 +167,20 @@ function JobItem({ job, onRequestDelete, onEditJob, onViewDetails }: JobItemProp
               job.round
                 ? "text-outline"
                 : job.status === "Offer"
-                ? "text-secondary"
-                : job.status === "Rejected"
-                ? "text-error/80"
-                : "text-outline"
+                  ? "text-secondary"
+                  : job.status === "Rejected"
+                    ? "text-error/80"
+                    : "text-outline"
             }`}
           >
             {job.round ||
               (job.status === "Offer"
                 ? "Decision Pending"
                 : job.status === "Rejected"
-                ? "Archived"
-                : job.status === "Interview"
-                ? "In Progress"
-                : "Awaiting Review")}
+                  ? "Archived"
+                  : job.status === "Interview"
+                    ? "In Progress"
+                    : "Awaiting Review")}
           </span>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -127,7 +189,7 @@ function JobItem({ job, onRequestDelete, onEditJob, onViewDetails }: JobItemProp
                 e.stopPropagation();
                 onEditJob(job);
               }}
-              className="px-3 py-1 rounded bg-surface-container-high hover:bg-surface-variant text-on-surface text-xs font-medium transition-all cursor-pointer"
+              className="cursor-pointer inline-flex items-center px-3 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-on-surface text-xs font-semibold active:scale-95 transition-all duration-150"
             >
               Edit
             </button>
@@ -136,7 +198,7 @@ function JobItem({ job, onRequestDelete, onEditJob, onViewDetails }: JobItemProp
                 e.stopPropagation();
                 onRequestDelete(job);
               }}
-              className="px-3 py-1 rounded bg-error-container/30 hover:bg-error-container text-error text-xs font-medium transition-all cursor-pointer"
+              className="cursor-pointer inline-flex items-center px-3 py-1.5 rounded-lg border border-outline-variant/40 bg-surface-container-high/60 hover:border-error/50 hover:bg-error-container/20 hover:text-error text-on-surface-variant text-xs font-semibold active:scale-95 transition-all duration-150"
             >
               Delete
             </button>

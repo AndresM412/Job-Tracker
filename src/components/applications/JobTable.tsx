@@ -1,18 +1,27 @@
 import { useState } from "react";
 import StatusBadge from "../ui/StatusBadge";
+import StarRating from "../ui/StarRating";
+import WorkModeBadge from "../ui/WorkModeBadge";
 import ConfirmDeleteModal from "../ui/ConfirmDeleteModal";
 import { type JobApplication } from "../../types/job";
+import { getSafeHttpUrl } from "../../utils/urlUtils";
 
 type JobTableProps = {
   jobs: JobApplication[];
   onDeleteJob: (id: string) => void;
   onEditJob: (job: JobApplication) => void;
   onViewDetails?: (job: JobApplication) => void;
+  onPriorityChange?: (jobId: string, priority: number) => void;
 };
 
-function JobTable({ jobs, onDeleteJob, onEditJob, onViewDetails }: JobTableProps) {
+function JobTable({
+  jobs,
+  onDeleteJob,
+  onEditJob,
+  onViewDetails,
+  onPriorityChange,
+}: JobTableProps) {
   const [jobToDelete, setJobToDelete] = useState<JobApplication | null>(null);
-
 
   return (
     <>
@@ -25,37 +34,49 @@ function JobTable({ jobs, onDeleteJob, onEditJob, onViewDetails }: JobTableProps
             <tr className="border-b border-outline-variant/20 bg-surface-container-low/60">
               <th
                 scope="col"
-                className="px-5 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider"
+                className="px-4 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider"
               >
                 Company
               </th>
               <th
                 scope="col"
-                className="px-5 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider"
+                className="px-4 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider"
               >
                 Role
               </th>
               <th
                 scope="col"
-                className="px-5 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider whitespace-nowrap"
+                className="px-4 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider whitespace-nowrap"
               >
                 Status
               </th>
               <th
                 scope="col"
-                className="px-5 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider whitespace-nowrap"
+                className="px-4 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider whitespace-nowrap"
+              >
+                Location / Type
+              </th>
+              <th
+                scope="col"
+                className="px-4 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider whitespace-nowrap"
               >
                 Applied Date
               </th>
               <th
                 scope="col"
-                className="px-5 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider whitespace-nowrap min-w-[170px]"
+                className="px-4 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider whitespace-nowrap min-w-[150px]"
               >
                 Stage / Salary
               </th>
               <th
                 scope="col"
-                className="px-5 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider text-right whitespace-nowrap w-[130px]"
+                className="px-4 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider whitespace-nowrap"
+              >
+                Priority
+              </th>
+              <th
+                scope="col"
+                className="px-4 py-3.5 text-[11px] font-semibold text-outline uppercase tracking-wider text-right whitespace-nowrap w-[150px]"
               >
                 Actions
               </th>
@@ -65,14 +86,16 @@ function JobTable({ jobs, onDeleteJob, onEditJob, onViewDetails }: JobTableProps
             {jobs.length === 0 ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={8}
                   className="px-5 py-14 text-center text-on-surface-variant text-sm font-medium"
                 >
                   No applications match this filter.
                 </td>
               </tr>
             ) : (
-              jobs.map((job) => (
+              jobs.map((job) => {
+                const safeJobUrl = getSafeHttpUrl(job.jobUrl);
+                return (
               <tr
                 key={job.id}
                 onClick={() => onViewDetails?.(job)}
@@ -80,28 +103,28 @@ function JobTable({ jobs, onDeleteJob, onEditJob, onViewDetails }: JobTableProps
                 className="group hover:bg-surface-container-high/40 transition-colors cursor-pointer"
               >
                 {/* 1. Company */}
-                <td className="px-5 py-4 whitespace-nowrap">
+                <td className="px-4 py-3.5 whitespace-nowrap">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-surface-container-high border border-outline-variant/40 flex items-center justify-center font-bold text-sm text-primary-container shadow-xs shrink-0">
                       {job.company.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
                       <div
-                        className="text-sm font-bold text-on-surface group-hover:text-primary-container transition-colors truncate max-w-[180px] sm:max-w-[220px]"
+                        className="text-sm font-bold text-on-surface group-hover:text-primary-container transition-colors truncate max-w-[160px] sm:max-w-[200px]"
                         title={job.company}
                       >
                         {job.company}
                       </div>
                       {Array.isArray(job.notes) && job.notes.length > 0 ? (
                         <div
-                          className="text-[11px] text-on-surface-variant/70 truncate max-w-[180px] sm:max-w-[220px]"
+                          className="text-[11px] text-on-surface-variant/70 truncate max-w-[160px] sm:max-w-[200px]"
                           title={`${job.notes[0].title}: ${job.notes[0].content}`}
                         >
                           {job.notes[0].title}
                         </div>
                       ) : typeof job.notes === "string" && job.notes ? (
                         <div
-                          className="text-[11px] text-on-surface-variant/70 truncate max-w-[180px] sm:max-w-[220px]"
+                          className="text-[11px] text-on-surface-variant/70 truncate max-w-[160px] sm:max-w-[200px]"
                           title={job.notes}
                         >
                           {job.notes}
@@ -112,9 +135,9 @@ function JobTable({ jobs, onDeleteJob, onEditJob, onViewDetails }: JobTableProps
                 </td>
 
                 {/* 2. Role */}
-                <td className="px-5 py-4 whitespace-nowrap text-sm font-medium text-on-surface">
+                <td className="px-4 py-3.5 whitespace-nowrap text-sm font-medium text-on-surface">
                   <div
-                    className="truncate max-w-[180px] sm:max-w-[220px]"
+                    className="truncate max-w-[160px] sm:max-w-[200px]"
                     title={job.position}
                   >
                     {job.position}
@@ -122,21 +145,45 @@ function JobTable({ jobs, onDeleteJob, onEditJob, onViewDetails }: JobTableProps
                 </td>
 
                 {/* 3. Status */}
-                <td className="px-5 py-4 whitespace-nowrap">
+                <td className="px-4 py-3.5 whitespace-nowrap">
                   <StatusBadge status={job.status} />
                 </td>
 
-                {/* 4. Applied Date */}
-                <td className="px-5 py-4 whitespace-nowrap text-xs text-on-surface-variant font-mono">
+                {/* 4. Location / Mode */}
+                <td className="px-4 py-3.5 whitespace-nowrap text-xs text-on-surface-variant">
+                  <div className="flex flex-col items-start gap-1 max-w-[160px]">
+                    {job.location && (
+                      <span
+                        className="inline-flex items-center gap-1 truncate max-w-full"
+                        title={job.location}
+                      >
+                        <span
+                          className="material-symbols-outlined text-[13px] text-outline shrink-0"
+                          aria-hidden="true"
+                        >
+                          location_on
+                        </span>
+                        <span className="truncate">{job.location}</span>
+                      </span>
+                    )}
+                    {job.workMode && <WorkModeBadge mode={job.workMode} size="xs" />}
+                    {!job.location && !job.workMode && (
+                      <span className="text-outline/50">—</span>
+                    )}
+                  </div>
+                </td>
+
+                {/* 5. Applied Date */}
+                <td className="px-4 py-3.5 whitespace-nowrap text-xs text-on-surface-variant font-mono">
                   {job.applicationDate}
                 </td>
 
-                {/* 5. Stage / Salary */}
-                <td className="px-5 py-4 whitespace-nowrap text-xs text-on-surface-variant min-w-[170px] max-w-[220px]">
+                {/* 6. Stage / Salary */}
+                <td className="px-4 py-3.5 whitespace-nowrap text-xs text-on-surface-variant min-w-[150px] max-w-[200px]">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {job.salary ? (
                       <span
-                        className="font-semibold text-secondary px-2 py-0.5 rounded-md bg-secondary/10 border border-secondary/20 truncate max-w-[160px]"
+                        className="font-semibold text-secondary px-2 py-0.5 rounded-md bg-secondary/10 border border-secondary/20 truncate max-w-[140px]"
                         title={job.salary}
                       >
                         {job.salary}
@@ -144,7 +191,7 @@ function JobTable({ jobs, onDeleteJob, onEditJob, onViewDetails }: JobTableProps
                     ) : null}
                     {job.round ? (
                       <span
-                        className="text-[11px] font-medium text-primary-container px-2 py-0.5 rounded-md bg-primary-container/10 border border-primary-container/20 truncate max-w-[120px]"
+                        className="text-[11px] font-medium text-primary-container px-2 py-0.5 rounded-md bg-primary-container/10 border border-primary-container/20 truncate max-w-[110px]"
                         title={job.round}
                       >
                         {job.round}
@@ -156,9 +203,40 @@ function JobTable({ jobs, onDeleteJob, onEditJob, onViewDetails }: JobTableProps
                   </div>
                 </td>
 
-                {/* 6. Actions */}
-                <td className="px-5 py-4 whitespace-nowrap text-right w-[130px]">
+                {/* 7. Priority */}
+                <td className="px-4 py-3.5 whitespace-nowrap">
+                  <StarRating
+                    value={job.priority}
+                    onChange={
+                      onPriorityChange
+                        ? (nextPriority) => onPriorityChange(job.id, nextPriority)
+                        : undefined
+                    }
+                    size="xs"
+                    stopPropagation
+                    testIdPrefix="table-star"
+                  />
+                </td>
+
+                {/* 8. Actions */}
+                <td className="px-4 py-3.5 whitespace-nowrap text-right w-[150px]">
                   <div className="inline-flex items-center justify-end gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
+                    {safeJobUrl && (
+                      <a
+                        href={safeJobUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        data-testid="table-job-url-link"
+                        title={`Open job posting: ${safeJobUrl}`}
+                        aria-label={`Open job posting for ${job.company}`}
+                        className="w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary-container flex items-center justify-center transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[17px]">
+                          open_in_new
+                        </span>
+                      </a>
+                    )}
                     {onViewDetails && (
                       <button
                         type="button"
@@ -181,11 +259,11 @@ function JobTable({ jobs, onDeleteJob, onEditJob, onViewDetails }: JobTableProps
                         e.stopPropagation();
                         onEditJob(job);
                       }}
-                      className="w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer"
+                      className="w-8 h-8 rounded-lg border border-outline-variant/30 bg-surface-container-high/60 hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface flex items-center justify-center active:scale-95 transition-all duration-150 cursor-pointer"
                       title="Edit"
                       aria-label="Edit"
                     >
-                      <span className="material-symbols-outlined text-[17px]">
+                      <span className="material-symbols-outlined text-[18px]">
                         edit
                       </span>
                     </button>
@@ -195,18 +273,20 @@ function JobTable({ jobs, onDeleteJob, onEditJob, onViewDetails }: JobTableProps
                         e.stopPropagation();
                         setJobToDelete(job);
                       }}
-                      className="w-8 h-8 rounded-lg bg-surface-container hover:bg-error-container/30 text-on-surface-variant hover:text-error flex items-center justify-center transition-colors cursor-pointer"
+                      className="w-8 h-8 rounded-lg border border-outline-variant/40 bg-surface-container-high/60 hover:border-error/50 hover:bg-error-container/20 hover:text-error text-on-surface-variant flex items-center justify-center active:scale-95 transition-all duration-150 cursor-pointer"
                       title="Delete"
                       aria-label="Delete"
                     >
-                      <span className="material-symbols-outlined text-[17px]">
+                      <span className="material-symbols-outlined text-[18px]">
                         delete
                       </span>
                     </button>
                   </div>
                 </td>
               </tr>
-            )))}
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
