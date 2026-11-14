@@ -4,6 +4,11 @@ export type JobStatus =
   | 'Rejected'
   | 'Offer';
 
+export type WorkMode =
+  | 'Remote'
+  | 'On-site'
+  | 'Hybrid';
+
 export interface JobNote {
   id: string;
   jobId: string;
@@ -22,5 +27,12 @@ export type JobApplication = {
   salary?: string;
   round?: string;
   description?: string;
+  jobUrl?: string;
+  priority?: number;
+  location?: string;
+  workMode?: WorkMode;
+  officeAddress?: string;
+  officeLat?: number;
+  officeLng?: number;
   createdAt?: string;
 };

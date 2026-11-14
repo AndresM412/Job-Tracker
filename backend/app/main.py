@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -8,6 +9,35 @@ from app.database import Base, engine, get_db
 from app import models, schemas, crud, auth
 
 Base.metadata.create_all(bind=engine)
+
+
+def _ensure_extra_job_columns() -> None:
+    """Agrega columnas nuevas de forma idempotente si la BD ya existía (ej. Docker local)."""
+    inspector = inspect(engine)
+    if "job_applications" not in inspector.get_table_names():
+        return
+
+    existing = {col["name"] for col in inspector.get_columns("job_applications")}
+    extra_columns = {
+        "job_url": "VARCHAR(500)",
+        "priority": "INTEGER NOT NULL DEFAULT 0",
+        "location": "VARCHAR(100)",
+        "work_mode": "VARCHAR(20)",
+        "office_address": "VARCHAR(255)",
+        "office_lat": "FLOAT",
+        "office_lng": "FLOAT",
+    }
+
+    missing = [(name, ddl) for name, ddl in extra_columns.items() if name not in existing]
+    if not missing:
+        return
+
+    with engine.begin() as conn:
+        for col_name, col_ddl in missing:
+            conn.execute(text(f"ALTER TABLE job_applications ADD COLUMN {col_name} {col_ddl}"))
+
+
+_ensure_extra_job_columns()
 
 app = FastAPI()
 
@@ -51,6 +81,20 @@ def update_job(
     current_user: models.User = Depends(auth.get_current_user),
 ):
     db_job = crud.update_job(db, job_id, job, user_id=current_user.id)
+    if db_job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return db_job
+
+
+@app.patch("/jobs/{job_id}", response_model=schemas.JobApplicationResponse)
+def patch_job(
+    job_id: str,
+    job_patch: schemas.JobApplicationPatch,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    """Actualización parcial in-situ (ej. estrellas de prioridad o pin de oficina)."""
+    db_job = crud.patch_job(db, job_id, job_patch, user_id=current_user.id)
     if db_job is None:
         raise HTTPException(status_code=404, detail="Job not found")
     return db_job
@@ -148,3 +192,12 @@ def user_login(
 
     access_token = auth.create_access_token(data={"sub": str(db_user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.delete("/users/me")
+def delete_current_user(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    crud.delete_user(db, current_user)
+    return {"message": "User deleted successfully"}
