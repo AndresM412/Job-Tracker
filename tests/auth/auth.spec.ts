@@ -1,8 +1,18 @@
 import { test, expect } from '@playwright/test';
 import { AuthPage } from '../pages/AuthPage';
 import { DashboardPage } from '../pages/DashboardPage';
+import { deleteUserByCredentials } from '../helpers';
 
 test.describe('Flujos de Autenticación E2E', () => {
+  let createdUser: { email: string; password: string } | null = null;
+
+  test.afterEach(async ({ request }) => {
+    if (createdUser) {
+      await deleteUserByCredentials(request, createdUser.email, createdUser.password);
+      createdUser = null;
+    }
+  });
+
   test('el usuario puede registrarse desde la UI y acceder al dashboard', async ({ page }) => {
     const auth = new AuthPage(page);
     const dashboard = new DashboardPage(page);
@@ -11,6 +21,7 @@ test.describe('Flujos de Autenticación E2E', () => {
 
     const uniqueEmail = `qa_user_${Date.now()}@example.com`;
     const password = 'Password123!';
+    createdUser = { email: uniqueEmail, password };
 
     // ACT: registramos a través del Page Object
     await auth.register(uniqueEmail, password);
@@ -26,6 +37,7 @@ test.describe('Flujos de Autenticación E2E', () => {
 
     const email = `login_user_${Date.now()}@example.com`;
     const password = 'Password123!';
+    createdUser = { email, password };
 
     // Asegurar que el usuario de pruebas exista en el backend
     await request.post('http://127.0.0.1:8000/register', {
@@ -63,6 +75,7 @@ test.describe('Flujos de Autenticación E2E', () => {
 
     const email = `logout_user_${Date.now()}@example.com`;
     const password = 'Password123!';
+    createdUser = { email, password };
 
     await request.post('http://127.0.0.1:8000/register', {
       data: { email, password },
