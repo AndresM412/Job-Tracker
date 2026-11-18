@@ -153,7 +153,7 @@ export const NoteModal: React.FC<NoteModalProps> = ({
   return (
     <div
       data-testid={mode === "view" ? "note-detail-modal-backdrop" : "note-modal-backdrop"}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
       onClick={onClose}
     >
       <div

@@ -231,7 +231,7 @@ export const JobDetailOverview: React.FC<JobDetailOverviewProps> = ({
           >
             {job.officeAddress ? "map" : "pin_drop"}
           </span>
-          <span>{job.officeAddress ? "View on Map" : "Pin Office"}</span>
+          <span>{job.officeAddress ? "View Office Map" : "Pin Office"}</span>
         </button>
       </div>
     </div>

@@ -151,8 +151,10 @@ test.describe('Notas Modulares con Título (Roadmap Item 4)', () => {
     await expect(detailModal).toBeVisible();
     await expect(detailModal).toContainText('Coding challenge on asynchronous streams');
 
-    // Probar transición in-situ a modo edición dentro del mismo modal
-    await page.getByTestId('modal-edit-note-btn').click();
+    // Probar transición in-situ a modo edición dentro del mismo modal delimitando al modal activo
+    const editBtn = detailModal.getByTestId('modal-edit-note-btn');
+    await expect(editBtn).toBeVisible();
+    await editBtn.click();
     await expect(dashboard.noteTitleInput).toBeVisible();
     await expect(dashboard.noteTitleInput).toHaveValue('Technical Interview Loop');
 
