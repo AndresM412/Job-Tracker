@@ -8,11 +8,18 @@ type JobListProps = {
   onDeleteJob: (id: string) => void;
   onEditJob: (job: JobApplication) => void;
   onViewDetails?: (job: JobApplication) => void;
+  onPriorityChange?: (jobId: string, priority: number) => void;
 };
 
 const BATCH_SIZE = 6;
 
-function JobList({ jobs, onDeleteJob, onEditJob, onViewDetails }: JobListProps) {
+function JobList({
+  jobs,
+  onDeleteJob,
+  onEditJob,
+  onViewDetails,
+  onPriorityChange,
+}: JobListProps) {
   const [jobToDelete, setJobToDelete] = useState<JobApplication | null>(null);
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -71,6 +78,7 @@ function JobList({ jobs, onDeleteJob, onEditJob, onViewDetails }: JobListProps) 
             onRequestDelete={setJobToDelete}
             onEditJob={onEditJob}
             onViewDetails={onViewDetails}
+            onPriorityChange={onPriorityChange}
           />
         ))}
 

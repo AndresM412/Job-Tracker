@@ -5,7 +5,43 @@
   --font-display: "Geist", "Space Grotesk", sans-serif;
   --font-body: "Geist", "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
+  --font-body-md: "Geist", "Inter", sans-serif;
+  --font-body-sm: "Geist", "Inter", sans-serif;
+  --font-headline-sm: "Geist", "Space Grotesk", sans-serif;
+  --font-label-sm: "Geist", "Inter", sans-serif;
+  --font-label-md: "Geist", "Inter", sans-serif;
 
+  /* Stitch Typography Scale */
+  --text-body-sm: 0.75rem;
+  --text-body-sm--line-height: 1.4;
+
+  --text-body-md: 0.875rem;
+  --text-body-md--line-height: 1.5;
+  --text-body-md--letter-spacing: -0.005em;
+
+  --text-body-lg: 1rem;
+  --text-body-lg--line-height: 1.5;
+  --text-body-lg--letter-spacing: -0.01em;
+
+  --text-headline-sm: 1.125rem;
+  --text-headline-sm--line-height: 1.4;
+  --text-headline-sm--letter-spacing: -0.015em;
+
+  --text-headline-md: 1.5rem;
+  --text-headline-md--line-height: 1.3;
+  --text-headline-md--letter-spacing: -0.02em;
+
+  --text-headline-lg: 2.25rem;
+  --text-headline-lg--line-height: 1.2;
+  --text-headline-lg--letter-spacing: -0.03em;
+
+  --text-label-sm: 0.6875rem;
+  --text-label-sm--line-height: 1;
+  --text-label-sm--letter-spacing: 0.04em;
+
+  --text-label-md: 0.8125rem;
+  --text-label-md--line-height: 1;
+  --text-label-md--letter-spacing: 0.01em;
 
   /* Stitch Material 3 Elevation & Surfaces */
   --color-background: #131315;
@@ -104,12 +140,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-
 @layer components {
   .input-field {
     @apply bg-bg border border-border rounded-lg px-3.5 py-2.5 text-sm text-text placeholder:text-muted/60 focus:outline-none focus:border-interview focus:ring-1 focus:ring-interview/40 transition-all;
   }
-  
+
   input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1) brightness(1.5);
     cursor: pointer;
@@ -133,22 +168,30 @@ body {
 
   /* Micro-glow interactive card effects */
   .card-glow-applied:hover {
-    box-shadow: 0 0 20px -3px rgba(245, 166, 91, 0.15), 0 0 8px -2px rgba(245, 166, 91, 0.1);
+    box-shadow:
+      0 0 20px -3px rgba(245, 166, 91, 0.15),
+      0 0 8px -2px rgba(245, 166, 91, 0.1);
     border-color: rgba(245, 166, 91, 0.4);
   }
 
   .card-glow-interview:hover {
-    box-shadow: 0 0 20px -3px rgba(139, 127, 232, 0.18), 0 0 8px -2px rgba(139, 127, 232, 0.12);
+    box-shadow:
+      0 0 20px -3px rgba(139, 127, 232, 0.18),
+      0 0 8px -2px rgba(139, 127, 232, 0.12);
     border-color: rgba(139, 127, 232, 0.45);
   }
 
   .card-glow-offer:hover {
-    box-shadow: 0 0 20px -3px rgba(95, 217, 168, 0.18), 0 0 8px -2px rgba(95, 217, 168, 0.12);
+    box-shadow:
+      0 0 20px -3px rgba(95, 217, 168, 0.18),
+      0 0 8px -2px rgba(95, 217, 168, 0.12);
     border-color: rgba(95, 217, 168, 0.45);
   }
 
   .card-glow-rejected:hover {
-    box-shadow: 0 0 20px -3px rgba(232, 96, 124, 0.15), 0 0 8px -2px rgba(232, 96, 124, 0.1);
+    box-shadow:
+      0 0 20px -3px rgba(232, 96, 124, 0.15),
+      0 0 8px -2px rgba(232, 96, 124, 0.1);
     border-color: rgba(232, 96, 124, 0.4);
   }
 
@@ -163,8 +206,14 @@ body {
 
   .grid-mesh {
     background-size: 48px 48px;
-    background-image: 
+    background-image:
       linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   }
+}
+
+/* Permite que cualquier clase de texto de Tailwind (ej. text-[12px], text-sm, text-xs) 
+   controle el tamaño de cada icono individualmente sin afectar a los demás */
+.material-symbols-outlined[class*="text-"] {
+  font-size: revert-layer;
 }

@@ -51,17 +51,20 @@ def create_job(db: Session, job: schemas.JobApplicationCreate, user_id: str):
     return db_job
 
 
-def update_job(
+def _apply_job_field_updates(
     db: Session,
     job_id: str,
-    job: schemas.JobApplicationCreate,
+    job_payload: schemas.JobApplicationCreate | schemas.JobApplicationPatch,
     user_id: str,
 ):
+    """Aplica actualizaciones totales o parciales respetando campos no enviados."""
     db_job = get_job(db, job_id, user_id)
     if db_job is None:
         return None
 
-    job_data = job.model_dump()
+    # exclude_unset=True preserva campos omitidos (como priority, description u office_*)
+    # mientras permite limpiar opcionales cuando se envían explícitamente como None.
+    job_data = job_payload.model_dump(exclude_unset=True)
     job_data.pop("notes", None)  # Las notas se gestionan a través de sus endpoints dedicados
 
     for key, value in job_data.items():
@@ -70,6 +73,24 @@ def update_job(
     db.commit()
     db.refresh(db_job)
     return db_job
+
+
+def update_job(
+    db: Session,
+    job_id: str,
+    job: schemas.JobApplicationCreate,
+    user_id: str,
+):
+    return _apply_job_field_updates(db, job_id, job, user_id)
+
+
+def patch_job(
+    db: Session,
+    job_id: str,
+    job_patch: schemas.JobApplicationPatch,
+    user_id: str,
+):
+    return _apply_job_field_updates(db, job_id, job_patch, user_id)
 
 
 def delete_job(db: Session, job_id: str, user_id: str):
@@ -180,3 +201,9 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
 
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
+
+
+def delete_user(db: Session, user: models.User):
+    db.delete(user)
+    db.commit()
+    return user

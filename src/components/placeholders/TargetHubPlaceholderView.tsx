@@ -1,4 +1,4 @@
-export function TargetHubPlaceholder() {
+export function TargetHubPlaceholderView() {
   return (
     <div
       data-testid="view-target-hub-placeholder"
@@ -41,4 +41,5 @@ export function TargetHubPlaceholder() {
   );
 }
 
-export default TargetHubPlaceholder;
+export const TargetHubPlaceholder = TargetHubPlaceholderView;
+export default TargetHubPlaceholderView;

@@ -161,3 +161,153 @@ def test_get_jobs_returns_newest_created_first(client):
     assert jobs[0]["company"] == "SecondCreated"
     assert jobs[1]["company"] == "FirstCreated"
     assert "created_at" in jobs[0]
+
+
+def test_create_job_with_extra_fields_and_url_normalization(client):
+    """Verifica normalización automática de job_url sin protocolo y valores por defecto."""
+    headers = get_auth_headers(client, "extra@example.com")
+
+    payload = {
+        "company": "Shopify",
+        "position": "QA Automation",
+        "status": "Applied",
+        "application_date": "2026-11-11",
+        "job_url": "careers.shopify.com/jobs/123",
+        "location": "  Toronto, Canada  ",
+        "work_mode": "Hybrid",
+    }
+    res = client.post("/jobs", json=payload, headers=headers)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["job_url"] == "https://careers.shopify.com/jobs/123"
+    assert data["priority"] == 0
+    assert data["location"] == "Toronto, Canada"
+    assert data["work_mode"] == "Hybrid"
+    assert data["office_address"] is None
+
+
+def test_job_url_rejects_unsafe_or_invalid_schemes(client):
+    """Previene inyección XSS (javascript:, data:) y esquemas no HTTP/HTTPS."""
+    headers = get_auth_headers(client, "security_url@example.com")
+
+    bad_urls = [
+        "javascript:alert(1)",
+        "JAVASCRIPT:alert(1)",
+        "data:text/html,<script>alert(1)</script>",
+        "ftp://files.example.com/job",
+        "//evil.com/phishing",
+        "not a valid url",
+        "justoneword",
+    ]
+    for bad_url in bad_urls:
+        res = client.post(
+            "/jobs",
+            json={
+                "company": "Acme",
+                "position": "Tester",
+                "status": "Applied",
+                "application_date": "2026-11-11",
+                "job_url": bad_url,
+            },
+            headers=headers,
+        )
+        assert res.status_code == 422, f"Expected 422 for URL: {bad_url}"
+
+
+def test_patch_job_priority_and_office_preserves_other_fields(client):
+    """Verifica actualizaciones parciales con PATCH, borrado selectivo con null y preservación en PUT."""
+    headers = get_auth_headers(client, "patcher@example.com")
+
+    job = client.post(
+        "/jobs",
+        json={
+            "company": "Vercel",
+            "position": "SDET",
+            "status": "Interview",
+            "application_date": "2026-11-11",
+            "location": "San Francisco, US",
+            "work_mode": "Remote",
+        },
+        headers=headers,
+    ).json()
+    job_id = job["id"]
+
+    # 1. Calificar prioridad con PATCH sin afectar los demás campos
+    patch_prio = client.patch(
+        f"/jobs/{job_id}",
+        json={"priority": 5},
+        headers=headers,
+    )
+    assert patch_prio.status_code == 200
+    assert patch_prio.json()["priority"] == 5
+    assert patch_prio.json()["location"] == "San Francisco, US"
+    assert patch_prio.json()["work_mode"] == "Remote"
+
+    # 2. Guardar coordenadas de oficina cacheadas con PATCH
+    patch_office = client.patch(
+        f"/jobs/{job_id}",
+        json={
+            "office_address": "440 N Barranca Ave, Covina, CA",
+            "office_lat": 34.09,
+            "office_lng": -117.88,
+        },
+        headers=headers,
+    )
+    assert patch_office.status_code == 200
+    assert patch_office.json()["office_address"] == "440 N Barranca Ave, Covina, CA"
+    assert patch_office.json()["office_lat"] == 34.09
+    assert patch_office.json()["priority"] == 5
+
+    # 3. PUT enviando solo campos básicos del formulario no borra prioridad ni oficina
+    put_res = client.put(
+        f"/jobs/{job_id}",
+        json={
+            "company": "Vercel",
+            "position": "Staff SDET",
+            "status": "Interview",
+            "application_date": "2026-11-11",
+        },
+        headers=headers,
+    )
+    assert put_res.status_code == 200
+    assert put_res.json()["position"] == "Staff SDET"
+    assert put_res.json()["priority"] == 5
+    assert put_res.json()["office_address"] == "440 N Barranca Ave, Covina, CA"
+
+    # 4. PATCH con null explícito limpia los campos opcionales de oficina
+    clear_office = client.patch(
+        f"/jobs/{job_id}",
+        json={"office_address": None, "office_lat": None, "office_lng": None},
+        headers=headers,
+    )
+    assert clear_office.status_code == 200
+    assert clear_office.json()["office_address"] is None
+    assert clear_office.json()["office_lat"] is None
+    assert clear_office.json()["priority"] == 5
+
+
+def test_patch_job_validation_and_multitenancy(client):
+    """Rechaza tipos inválidos/nulos en campos no anulables y bloquea PATCH entre usuarios."""
+    owner_headers = get_auth_headers(client, "owner_patch@example.com")
+    other_headers = get_auth_headers(client, "other_patch@example.com")
+
+    job_id = client.post(
+        "/jobs",
+        json={
+            "company": "Stripe",
+            "position": "QA",
+            "status": "Applied",
+            "application_date": "2026-11-11",
+        },
+        headers=owner_headers,
+    ).json()["id"]
+
+    # Validaciones negativas (422)
+    assert client.patch(f"/jobs/{job_id}", json={"priority": None}, headers=owner_headers).status_code == 422
+    assert client.patch(f"/jobs/{job_id}", json={"priority": 6}, headers=owner_headers).status_code == 422
+    assert client.patch(f"/jobs/{job_id}", json={"priority": -1}, headers=owner_headers).status_code == 422
+    assert client.patch(f"/jobs/{job_id}", json={"work_mode": "Freelance"}, headers=owner_headers).status_code == 422
+    assert client.patch(f"/jobs/{job_id}", json={"office_lat": 95.0}, headers=owner_headers).status_code == 422
+
+    # Multi-tenancy (404)
+    assert client.patch(f"/jobs/{job_id}", json={"priority": 4}, headers=other_headers).status_code == 404

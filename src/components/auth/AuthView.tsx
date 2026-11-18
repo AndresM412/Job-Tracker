@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { loginApi, registerApi } from "../../services/authApi";
 
-interface AuthFormProps {
+interface AuthViewProps {
   onSuccess: (token: string, email: string) => void;
   initialError?: string | null;
   initialMode?: "login" | "register";
 }
 
-export const AuthForm: React.FC<AuthFormProps> = ({
+export type AuthFormProps = AuthViewProps;
+
+export const AuthView: React.FC<AuthViewProps> = ({
   onSuccess,
   initialError,
   initialMode = "login",
@@ -277,3 +279,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({
     </div>
   );
 };
+
+export const AuthForm = AuthView;
+export default AuthView;

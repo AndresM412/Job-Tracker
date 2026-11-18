@@ -206,7 +206,7 @@ export const JobDescriptionModal: React.FC<JobDescriptionModalProps> = ({
           </div>
         )}
 
-        {/* Footer Actions Estandarizado (mismos tamaños, paddings y alturas h-9) */}
+        {/* Footer Actions Estandarizado (estilos simétricos con hover luminoso) */}
         <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-outline-variant/20 mt-4 shrink-0">
           {mode === "view" ? (
             <button
@@ -216,10 +216,10 @@ export const JobDescriptionModal: React.FC<JobDescriptionModalProps> = ({
                 setDraft(description);
                 setMode("edit");
               }}
-              className="h-9 px-4 rounded-lg bg-primary-container text-on-primary-container text-xs font-semibold hover:brightness-110 active:scale-95 transition-all shadow-xs cursor-pointer inline-flex items-center justify-center gap-1.5"
+              className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-semibold shadow-[0_0_12px_rgba(129,140,248,0.25)] hover:bg-[#e0e0ff] hover:shadow-[0_0_18px_rgba(189,194,255,0.55)] active:scale-95 transition-all duration-150"
             >
               <span
-                className="material-symbols-outlined text-[15px]"
+                className="material-symbols-outlined text-[18px]"
                 aria-hidden="true"
               >
                 edit
@@ -231,7 +231,7 @@ export const JobDescriptionModal: React.FC<JobDescriptionModalProps> = ({
               <button
                 type="button"
                 onClick={handleCancelEdit}
-                className="h-9 px-4 rounded-lg border border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-xs font-semibold transition-colors cursor-pointer inline-flex items-center justify-center"
+                className="cursor-pointer inline-flex items-center justify-center px-4 py-2 rounded-xl border border-outline-variant/40 bg-surface-container-high/60 text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-xs font-semibold active:scale-95 transition-all duration-150"
               >
                 Cancel
               </button>
@@ -240,10 +240,10 @@ export const JobDescriptionModal: React.FC<JobDescriptionModalProps> = ({
                 data-testid="modal-save-description-btn"
                 onClick={handleSave}
                 disabled={isSaving || draft.length > MAX_DESCRIPTION_LENGTH}
-                className="h-9 px-4 rounded-lg bg-primary-container text-on-primary-container text-xs font-semibold hover:brightness-110 disabled:opacity-50 active:scale-95 transition-all shadow-xs cursor-pointer inline-flex items-center justify-center gap-1.5"
+                className="cursor-pointer inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-semibold shadow-[0_0_12px_rgba(129,140,248,0.25)] hover:bg-[#e0e0ff] hover:shadow-[0_0_18px_rgba(189,194,255,0.55)] active:scale-95 transition-all duration-150 disabled:opacity-50"
               >
                 <span
-                  className="material-symbols-outlined text-[15px]"
+                  className="material-symbols-outlined text-[18px]"
                   aria-hidden="true"
                 >
                   check

@@ -238,7 +238,7 @@ export function SalaryRangeInput({ value, onChange }: SalaryRangeInputProps) {
             <button
               type="button"
               onClick={handleApply}
-              className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-primary-container text-on-primary-container hover:brightness-110 active:scale-95 transition-all shadow-sm shadow-primary-container/30 cursor-pointer"
+              className="cursor-pointer px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-primary text-on-primary shadow-[0_0_12px_rgba(129,140,248,0.25)] hover:bg-[#e0e0ff] hover:shadow-[0_0_18px_rgba(189,194,255,0.55)] active:scale-95 transition-all duration-150"
             >
               Apply Range
             </button>

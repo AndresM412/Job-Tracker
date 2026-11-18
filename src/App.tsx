@@ -4,17 +4,19 @@ import JobTable from "./components/applications/JobTable";
 import Pagination from "./components/applications/Pagination";
 import { type JobApplication } from "./types/job";
 import StatusDropdown, { type FilterValue } from "./components/applications/filters/StatusDropdown";
+import PriorityDropdown, { type PriorityFilterValue } from "./components/applications/filters/PriorityDropdown";
+import LocationFilterDropdown, { type WorkModeFilterValue } from "./components/applications/filters/LocationFilterDropdown";
 import DateRangeDropdown, { type DateRange } from "./components/applications/filters/DateRangeDropdown";
 import SearchBar from "./components/applications/filters/SearchBar";
 import SortControl, { type SortOrder } from "./components/applications/filters/SortControl";
-import { AuthForm } from "./components/auth/AuthForm";
-import { LandingPage } from "./components/landing/LandingPage";
+import { AuthView } from "./components/auth/AuthView";
+import { LandingView } from "./components/landing/LandingView";
 import { Sidebar, type ActiveTab } from "./components/dashboard/Sidebar";
 import { DashboardView } from "./components/dashboard/DashboardView";
 import JobFormView from "./components/applications/JobFormView";
 import JobDetailView from "./components/applications/JobDetailView";
-import { CalendarPlaceholder } from "./components/placeholders/CalendarPlaceholder";
-import { TargetHubPlaceholder } from "./components/placeholders/TargetHubPlaceholder";
+import { CalendarPlaceholderView } from "./components/placeholders/CalendarPlaceholderView";
+import { TargetHubPlaceholderView } from "./components/placeholders/TargetHubPlaceholderView";
 import * as jobsApi from "./services/jobsApi";
 
 type UnauthView = "landing" | "login" | "register";
@@ -46,6 +48,9 @@ function App() {
   }
   const [formState, setFormState] = useState<FormState | null>(null);
   const [filterStatus, setFilterStatus] = useState<FilterValue>("All");
+  const [filterPriority, setFilterPriority] = useState<PriorityFilterValue>("All");
+  const [filterWorkMode, setFilterWorkMode] = useState<WorkModeFilterValue>("All");
+  const [filterLocation, setFilterLocation] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("recently_added");
   const [activeTab, setActiveTab] = useState<ActiveTab>("applications");
@@ -61,6 +66,25 @@ function App() {
     localStorage.setItem("job_tracker_view_mode", mode);
   };
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("jobtracker_sidebar_collapsed") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const handleToggleSidebarCollapse = () => {
+    setIsSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("jobtracker_sidebar_collapsed", String(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
   // unified full-screen form state used via formState
   const [selectedJobDetail, setSelectedJobDetail] = useState<JobApplication | null>(null);
 
@@ -145,11 +169,11 @@ function App() {
 
   if (!token) {
     if (unauthView === "landing") {
-      return <LandingPage onNavigateToAuth={navigateTo} />;
+      return <LandingView onNavigateToAuth={navigateTo} />;
     }
 
     return (
-      <AuthForm
+      <AuthView
         onSuccess={handleLoginSuccess}
         initialError={authNotice}
         initialMode={unauthView}
@@ -200,17 +224,59 @@ function App() {
     }
   }
 
+  async function handlePriorityChange(jobId: string, nextPriority: number) {
+    const previousJob = jobs.find((j) => j.id === jobId);
+    setJobs((currentJobs) =>
+      currentJobs.map((job) =>
+        job.id === jobId ? { ...job, priority: nextPriority } : job
+      )
+    );
+    try {
+      const savedJob = await jobsApi.patchJob(jobId, { priority: nextPriority });
+      setJobs((currentJobs) =>
+        currentJobs.map((job) => (job.id === savedJob.id ? savedJob : job))
+      );
+    } catch (err: any) {
+      if (previousJob) {
+        setJobs((currentJobs) =>
+          currentJobs.map((job) => (job.id === jobId ? previousJob : job))
+        );
+      }
+      if (err?.message === "SESSION_EXPIRED") {
+        handleLogout("Your session has expired due to inactivity. Please log in again.");
+        return;
+      }
+      setError("Failed to update application priority.");
+    }
+  }
+
   const statusFiltered =
     filterStatus === "All"
       ? jobs
       : jobs.filter((job) => job.status === filterStatus);
 
-  const searchFiltered = statusFiltered.filter((job) => {
+  const priorityFiltered =
+    filterPriority === "All"
+      ? statusFiltered
+      : statusFiltered.filter((job) => (job.priority ?? 0) === filterPriority);
+
+  const locationQuery = filterLocation.trim().toLowerCase();
+  const locationModeFiltered = priorityFiltered.filter((job) => {
+    const matchesMode =
+      filterWorkMode === "All" || job.workMode === filterWorkMode;
+    const matchesLocation =
+      !locationQuery ||
+      (job.location || "").toLowerCase().includes(locationQuery);
+    return matchesMode && matchesLocation;
+  });
+
+  const searchFiltered = locationModeFiltered.filter((job) => {
     const query = searchText.toLowerCase();
     return (
       job.company.toLowerCase().includes(query) ||
       job.position.toLowerCase().includes(query) ||
-      job.status.toLowerCase().includes(query)
+      job.status.toLowerCase().includes(query) ||
+      (job.location || "").toLowerCase().includes(query)
     );
   });
 
@@ -274,10 +340,16 @@ function App() {
         onLogout={() => handleLogout()}
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={handleToggleSidebarCollapse}
       />
 
-      {/* Contenedor Principal (con padding izquierdo en desktop adaptado al ancho w-56 del sidebar) */}
-      <div className="flex-1 lg:pl-56 flex flex-col min-h-screen min-w-0">
+      {/* Contenedor Principal (con padding izquierdo en desktop adaptado al estado colapsado/expandido del sidebar) */}
+      <div
+        className={`flex-1 flex flex-col min-h-screen min-w-0 transition-[padding-left] duration-200 ease-out ${
+          isSidebarCollapsed ? "lg:pl-20" : "lg:pl-64"
+        }`}
+      >
         {/* Barra Superior del Contenido (oculta en vista detalle para aprovechar toda la pantalla sin scroll) */}
         {!selectedJobDetail && (
           <header className="sticky top-0 z-30 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-outline-variant/30 px-6 py-4">
@@ -289,7 +361,7 @@ function App() {
                   className="lg:hidden p-2 rounded-xl bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer shrink-0"
                   aria-label="Open navigation menu"
                 >
-                  <span className="material-symbols-outlined text-[20px] block">menu</span>
+                  <span className="material-symbols-outlined text-[20px] block" aria-hidden="true">menu</span>
                 </button>
                 <div className="min-w-0">
                   <h1 className="text-lg sm:text-xl font-bold text-on-surface tracking-tight truncate">
@@ -306,14 +378,15 @@ function App() {
                   <button
                     type="button"
                     data-testid="open-add-job-modal-btn"
+                    aria-label="Add Application"
                     onClick={() => {
                       setActiveTab("applications");
                       setSelectedJobDetail(null);
                       setFormState({ mode: "create", returnTo: "list" });
                     }}
-                    className="px-3.5 sm:px-4 py-2 rounded-xl bg-primary-container text-on-primary-container text-xs font-semibold flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-[0_0_16px_rgba(129,140,248,0.25)] cursor-pointer"
+                    className="cursor-pointer px-3.5 sm:px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-semibold flex items-center gap-2 shadow-[0_0_12px_rgba(129,140,248,0.25)] hover:bg-[#e0e0ff] hover:shadow-[0_0_18px_rgba(189,194,255,0.55)] active:scale-95 transition-all duration-150"
                   >
-                    <span className="material-symbols-outlined text-[17px]">add_circle</span>
+                    <span className="material-symbols-outlined text-[18px]" aria-hidden="true">add_circle</span>
                     <span className="hidden sm:inline">Add Application</span>
                     <span className="sm:hidden">Add</span>
                   </button>
@@ -404,9 +477,9 @@ function App() {
                 />
               ) : (
                 <div className="flex flex-col w-full">
-                  {/* Single-row toolbar matching the mockup */}
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-6">
-                    <div className="flex-1 min-w-[240px]">
+                  {/* Responsive toolbar: wraps cleanly below 1280px without crowding */}
+                  <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 mb-6">
+                    <div className="w-full xl:flex-1 min-w-0">
                       <SearchBar
                         value={searchText}
                         onChange={(text) => {
@@ -416,7 +489,7 @@ function App() {
                       />
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2.5">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                       <StatusDropdown
                         currentFilter={filterStatus}
                         onFilterChange={(filter) => {
@@ -434,19 +507,28 @@ function App() {
                         }}
                       />
 
-                      {/* Priority Filter Placeholder */}
-                      <button
-                        type="button"
-                        disabled
-                        title="Priority tags coming soon"
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-outline-variant/30 bg-surface-container text-outline/60 cursor-not-allowed opacity-75"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-outline/40" />
-                        <span>Priority</span>
-                        <span className="material-symbols-outlined text-[16px] text-outline/50 pointer-events-none">
-                          expand_more
-                        </span>
-                      </button>
+                      <PriorityDropdown
+                        currentFilter={filterPriority}
+                        onFilterChange={(priority) => {
+                          setFilterPriority(priority);
+                          setCurrentPage(1);
+                        }}
+                        jobs={jobs}
+                      />
+
+                      <LocationFilterDropdown
+                        workModeFilter={filterWorkMode}
+                        locationFilter={filterLocation}
+                        onWorkModeChange={(mode) => {
+                          setFilterWorkMode(mode);
+                          setCurrentPage(1);
+                        }}
+                        onLocationChange={(loc) => {
+                          setFilterLocation(loc);
+                          setCurrentPage(1);
+                        }}
+                        jobs={jobs}
+                      />
 
                       <SortControl
                         value={sortOrder}
@@ -500,9 +582,41 @@ function App() {
                   </div>
 
                   {isLoading ? (
-                    <div className="text-center py-16 text-on-surface-variant text-sm">
-                      Loading applications...
-                    </div>
+                    viewMode === "grid" ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+                        {Array.from({ length: 6 }).map((_, idx) => (
+                          <div
+                            key={`initial-skeleton-${idx}`}
+                            className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-5 animate-pulse flex flex-col justify-between h-52"
+                          >
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div className="h-5 w-32 bg-surface-container-highest rounded-md" />
+                                <div className="h-5 w-20 bg-surface-container-highest rounded-full" />
+                              </div>
+                              <div className="h-4 w-44 bg-surface-container-highest/60 rounded" />
+                              <div className="flex gap-2 pt-1">
+                                <div className="h-4 w-16 bg-surface-container-highest/40 rounded-full" />
+                                <div className="h-4 w-20 bg-surface-container-highest/40 rounded-full" />
+                              </div>
+                            </div>
+                            <div className="pt-4 border-t border-outline-variant/15 flex items-center justify-between">
+                              <div className="h-3.5 w-24 bg-surface-container-highest/40 rounded" />
+                              <div className="h-4 w-16 bg-surface-container-highest/50 rounded" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-6 animate-pulse space-y-4">
+                        {Array.from({ length: 6 }).map((_, idx) => (
+                          <div
+                            key={`table-skeleton-${idx}`}
+                            className="h-10 bg-surface-container-highest/40 rounded-lg"
+                          />
+                        ))}
+                      </div>
+                    )
                   ) : viewMode === "grid" ? (
                     <JobList
                       jobs={sortedJobs}
@@ -514,6 +628,7 @@ function App() {
                         setFormState(null);
                         setSelectedJobDetail(job);
                       }}
+                      onPriorityChange={handlePriorityChange}
                     />
                   ) : (
                     <>
@@ -527,6 +642,7 @@ function App() {
                           setFormState(null);
                           setSelectedJobDetail(job);
                         }}
+                        onPriorityChange={handlePriorityChange}
                       />
                       <Pagination
                         currentPage={currentPage}
@@ -561,10 +677,10 @@ function App() {
             )}
 
             {/* Vista 4: Calendar */}
-            {activeTab === "calendar" && <CalendarPlaceholder />}
+            {activeTab === "calendar" && <CalendarPlaceholderView />}
 
             {/* Vista 5: Target Companies */}
-            {activeTab === "companies" && <TargetHubPlaceholder />}
+            {activeTab === "companies" && <TargetHubPlaceholderView />}
           </div>
         </main>
       </div>

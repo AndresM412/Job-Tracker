@@ -1,6 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
-export async function loginApi(email: string, password: str): Promise<string> {
+export async function loginApi(email: string, password: string): Promise<string> {
   const formData = new URLSearchParams();
   formData.append("username", email);
   formData.append("password", password);
@@ -22,7 +22,7 @@ export async function loginApi(email: string, password: str): Promise<string> {
   return data.access_token;
 }
 
-export async function registerApi(email: string, password: str): Promise<void> {
+export async function registerApi(email: string, password: string): Promise<void> {
   const response = await fetch(`${API_URL}/register`, {
     method: "POST",
     headers: {

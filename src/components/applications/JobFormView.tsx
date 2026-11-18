@@ -1,13 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
-import { type JobApplication } from "../../types/job";
+import { type JobApplication, type WorkMode } from "../../types/job";
 import SalaryRangeInput from "../ui/SalaryRangeInput";
+import { getSafeHttpUrl } from "../../utils/urlUtils";
 
 interface JobFormViewProps {
   mode: "create" | "edit";
   initialJob?: JobApplication | null;
-  onSave: (job: JobApplication) => void;
+  onSave: (job: JobApplication) => Promise<void> | void;
   onCancel: () => void;
 }
+
+const WORK_MODE_OPTIONS: Array<{ value: WorkMode; icon: string }> = [
+  { value: "Remote", icon: "laptop_mac" },
+  { value: "Hybrid", icon: "swap_horiz" },
+  { value: "On-site", icon: "apartment" },
+];
 
 export const JobFormView: React.FC<JobFormViewProps> = ({
   mode,
@@ -21,6 +28,10 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
   const [applicationDate, setApplicationDate] = useState("");
   const [salary, setSalary] = useState<string | undefined>(undefined);
   const [round, setRound] = useState("");
+  const [jobUrl, setJobUrl] = useState("");
+  const [location, setLocation] = useState("");
+  const [workMode, setWorkMode] = useState<WorkMode | undefined>(undefined);
+  const [urlError, setUrlError] = useState<string | null>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -31,6 +42,9 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
       setApplicationDate(initialJob.applicationDate);
       setSalary(initialJob.salary);
       setRound(initialJob.round ?? "");
+      setJobUrl(initialJob.jobUrl ?? "");
+      setLocation(initialJob.location ?? "");
+      setWorkMode(initialJob.workMode);
     } else {
       setCompany("");
       setPosition("");
@@ -38,7 +52,11 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
       setApplicationDate(new Date().toISOString().split("T")[0]);
       setSalary(undefined);
       setRound("");
+      setJobUrl("");
+      setLocation("");
+      setWorkMode(undefined);
     }
+    setUrlError(null);
   }, [mode, initialJob]);
 
   const isFormValid =
@@ -51,6 +69,21 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
     e.preventDefault();
     if (!isFormValid) return;
 
+    const trimmedUrl = jobUrl.trim();
+    let normalizedUrl: string | undefined;
+    if (trimmedUrl !== "") {
+      const safe = getSafeHttpUrl(trimmedUrl);
+      if (!safe) {
+        setUrlError(
+          "Please enter a valid web link (e.g. https://linkedin.com/jobs/123)."
+        );
+        return;
+      }
+      normalizedUrl = safe;
+    }
+
+    setUrlError(null);
+
     const payload: JobApplication = {
       id: mode === "edit" && initialJob ? initialJob.id : Date.now().toString(),
       company: company.trim(),
@@ -59,7 +92,15 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
       applicationDate,
       salary,
       round: round.trim() === "" ? undefined : round.trim(),
+      jobUrl: normalizedUrl,
+      location: location.trim() === "" ? undefined : location.trim(),
+      workMode,
       notes: initialJob?.notes,
+      description: initialJob?.description,
+      priority: initialJob?.priority,
+      officeAddress: initialJob?.officeAddress,
+      officeLat: initialJob?.officeLat,
+      officeLng: initialJob?.officeLng,
       createdAt:
         mode === "edit" && initialJob ? initialJob.createdAt : undefined,
     };
@@ -128,7 +169,7 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
       </div>
 
       {/* Form Card */}
-      <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-6 sm:p-8 shadow-sm">
+      <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-4 sm:p-8 shadow-sm">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Sección 1: Información Básica */}
           <div>
@@ -255,15 +296,124 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
             </div>
           </div>
 
+          {/* Sección 4: Ubicación, Modalidad y Link de la Vacante (Opcionales) */}
+          <div>
+            <h2 className="text-xs font-mono uppercase tracking-wider text-outline font-semibold mb-4">
+              Location &amp; Job Link (Optional)
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="job-location-input"
+                  className="block text-xs font-semibold text-on-surface-variant mb-1.5"
+                >
+                  Location (Optional)
+                </label>
+                <input
+                  id="job-location-input"
+                  data-testid="job-location-input"
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="e.g. Toronto, Canada or Bogotá, Colombia"
+                  maxLength={100}
+                  className="w-full bg-surface-container-lowest text-on-surface text-sm px-4 py-2.5 rounded-xl border border-outline-variant/40 focus:border-primary-container/80 focus:outline-none transition-all placeholder:text-outline-variant"
+                />
+              </div>
+
+              <div>
+                <span className="block text-xs font-semibold text-on-surface-variant mb-1.5">
+                  Work Type (Optional)
+                </span>
+                <div
+                  role="group"
+                  aria-label="Work Type"
+                  className="grid grid-cols-3 gap-2"
+                >
+                  {WORK_MODE_OPTIONS.map((option) => {
+                    const isSelected = workMode === option.value;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        data-testid={`work-mode-option-${option.value.toLowerCase()}`}
+                        aria-pressed={isSelected}
+                        onClick={() =>
+                          setWorkMode(isSelected ? undefined : option.value)
+                        }
+                        className={`px-2.5 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                          isSelected
+                            ? "bg-primary-container/20 border-primary-container text-primary shadow-xs"
+                            : "bg-surface-container-lowest border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:border-outline-variant"
+                        }`}
+                      >
+                        <span
+                          className="material-symbols-outlined text-[15px]"
+                          aria-hidden="true"
+                        >
+                          {option.icon}
+                        </span>
+                        <span>{option.value}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label
+                  htmlFor="job-url-input"
+                  className="block text-xs font-semibold text-on-surface-variant mb-1.5"
+                >
+                  Job Link (Optional)
+                </label>
+                <div className="relative">
+                  <span
+                    className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[17px] pointer-events-none"
+                    aria-hidden="true"
+                  >
+                    link
+                  </span>
+                  <input
+                    id="job-url-input"
+                    data-testid="job-url-input"
+                    type="text"
+                    value={jobUrl}
+                    onChange={(e) => {
+                      setJobUrl(e.target.value);
+                      if (urlError) setUrlError(null);
+                    }}
+                    placeholder="https://linkedin.com/jobs/view/..."
+                    maxLength={500}
+                    className={`w-full bg-surface-container-lowest text-on-surface text-sm pl-10 pr-4 py-2.5 rounded-xl border focus:outline-none transition-all placeholder:text-outline-variant ${
+                      urlError
+                        ? "border-error focus:border-error"
+                        : "border-outline-variant/40 focus:border-primary-container/80"
+                    }`}
+                  />
+                </div>
+                {urlError && (
+                  <p
+                    role="alert"
+                    data-testid="job-url-error"
+                    className="mt-1.5 text-xs text-error font-medium"
+                  >
+                    {urlError}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Botones de Acción: tamaños y proporciones armónicas */}
-          <div className="flex items-center justify-end gap-3 pt-5 border-t border-outline-variant/30">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-5 border-t border-outline-variant/30">
             <button
               type="button"
               onClick={onCancel}
-              className="px-5 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-on-surface border border-outline-variant/60 text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95"
+              className="cursor-pointer px-5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-high/60 hover:bg-surface-container text-on-surface-variant hover:text-on-surface text-xs font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all duration-150 shadow-xs"
             >
               <span
-                className="material-symbols-outlined text-[16px] text-outline"
+                className="material-symbols-outlined text-[18px] text-outline"
                 aria-hidden="true"
               >
                 close
@@ -273,10 +423,10 @@ export const JobFormView: React.FC<JobFormViewProps> = ({
             <button
               type="submit"
               disabled={!isFormValid}
-              className="px-5 py-2.5 bg-primary-container text-surface hover:brightness-110 active:scale-95 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(129,140,248,0.35)] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="cursor-pointer px-5 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-semibold flex items-center justify-center gap-2 shadow-[0_0_12px_rgba(129,140,248,0.25)] hover:bg-[#e0e0ff] hover:shadow-[0_0_18px_rgba(189,194,255,0.55)] active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <span
-                className="material-symbols-outlined text-[16px]"
+                className="material-symbols-outlined text-[18px]"
                 aria-hidden="true"
               >
                 {mode === "edit" ? "save" : "add_circle"}

@@ -6,6 +6,9 @@ export interface JobData {
   status?: string;
   date: string;
   notes?: string;
+  jobUrl?: string;
+  location?: string;
+  workMode?: 'Remote' | 'On-site' | 'Hybrid';
 }
 
 export class DashboardPage {
@@ -17,12 +20,16 @@ export class DashboardPage {
   readonly statusSelect: Locator;
   readonly dateInput: Locator;
   readonly notesInput: Locator;
+  readonly jobUrlInput: Locator;
+  readonly locationInput: Locator;
   readonly addJobButton: Locator;
   readonly saveChangesButton: Locator;
 
   // 2. Locators de Búsqueda, Filtros y Ordenamiento
   readonly searchInput: Locator;
   readonly sortSelect: Locator;
+  readonly priorityFilterButton: Locator;
+  readonly locationFilterButton: Locator;
   readonly viewModeGridButton: Locator;
   readonly viewModeTableButton: Locator;
   readonly jobTable: Locator;
@@ -73,12 +80,16 @@ export class DashboardPage {
     this.statusSelect = page.getByTestId('status-select');
     this.dateInput = page.locator('input[type="date"]');
     this.notesInput = page.getByPlaceholder(/Notes \(optional\)/i);
+    this.jobUrlInput = page.getByTestId('job-url-input');
+    this.locationInput = page.getByTestId('job-location-input');
     this.addJobButton = page.getByRole('button', { name: /Add (Application|Job)/i });
     this.saveChangesButton = page.getByRole('button', { name: 'Save Changes' });
 
     // Controles de Filtrado y Ordenamiento
     this.searchInput = page.getByPlaceholder('Search by company, position, or status...');
     this.sortSelect = page.getByTestId('sort-control');
+    this.priorityFilterButton = page.getByTestId('priority-filter-dropdown-btn');
+    this.locationFilterButton = page.getByTestId('location-filter-dropdown-btn');
     this.viewModeGridButton = page.getByTestId('view-mode-grid');
     this.viewModeTableButton = page.getByTestId('view-mode-table');
     this.jobTable = page.getByTestId('job-table');
@@ -107,7 +118,7 @@ export class DashboardPage {
     this.formCancelButton = page.getByRole('button', { name: 'Cancel' });
     this.detailEditButton = page.getByTestId('detail-edit-job-btn').or(page.getByTestId('job-detail-view').getByRole('button', { name: /^edit$/i }));
     this.detailDeleteButton = page.getByTestId('detail-delete-job-btn').or(page.getByTestId('job-detail-view').getByRole('button', { name: /^delete$/i }));
-    this.openAddApplicationButton = page.getByRole('button', { name: /Add Application/i });
+    this.openAddApplicationButton = page.getByTestId('open-add-job-modal-btn').or(page.getByRole('button', { name: /Add Application/i }));
 
     // Notas Modulares
     this.addNoteButton = page.getByTestId('add-note-btn');
@@ -160,9 +171,8 @@ export class DashboardPage {
 
   async addJob(job: JobData) {
     if (!(await this.companyInput.isVisible())) {
-      const openBtn = this.page.getByRole('button', { name: /Add Application/i });
-      if (await openBtn.isVisible()) {
-        await openBtn.click();
+      if (await this.openAddApplicationButton.isVisible()) {
+        await this.openAddApplicationButton.click();
       }
       await this.companyInput.waitFor({ state: 'visible' });
     }
@@ -172,6 +182,15 @@ export class DashboardPage {
     await this.dateInput.fill(job.date);
     if (job.notes && (await this.notesInput.isVisible())) {
       await this.notesInput.fill(job.notes);
+    }
+    if (job.location) {
+      await this.locationInput.fill(job.location);
+    }
+    if (job.workMode) {
+      await this.selectWorkMode(job.workMode);
+    }
+    if (job.jobUrl) {
+      await this.jobUrlInput.fill(job.jobUrl);
     }
     await this.page.getByRole('button', { name: 'Add Job' }).click();
     await expect(this.companyInput).not.toBeVisible();
@@ -248,5 +267,44 @@ export class DashboardPage {
 
   getNoteCard(title: string): Locator {
     return this.page.locator('[data-testid^="note-card-"]').filter({ hasText: title });
+  }
+
+  // --- Métodos para Campos Extra, Prioridad y Filtros ---
+
+  async selectWorkMode(mode: 'Remote' | 'On-site' | 'Hybrid') {
+    await this.page.getByTestId(`work-mode-option-${mode.toLowerCase()}`).click();
+  }
+
+  async setPriorityOnCard(company: string, stars: 1 | 2 | 3 | 4 | 5) {
+    const card = this.getJobCard(company);
+    await card.getByTestId(`card-star-${stars}`).click();
+  }
+
+  async setPriorityInTable(company: string, stars: 1 | 2 | 3 | 4 | 5) {
+    const row = this.getJobCard(company);
+    await row.getByTestId(`table-star-${stars}`).click();
+  }
+
+  async filterByPriority(priority: 'all' | 0 | 1 | 2 | 3 | 4 | 5) {
+    await this.priorityFilterButton.click();
+    await this.page.getByTestId(`priority-filter-option-${priority}`).click();
+  }
+
+  async filterByWorkMode(mode: 'All' | 'Remote' | 'On-site' | 'Hybrid') {
+    await this.locationFilterButton.click();
+    await this.page.getByTestId(`work-mode-filter-${mode.toLowerCase()}`).click();
+    await this.page.keyboard.press('Escape');
+    // Cerrar popover haciendo clic fuera si sigue abierto
+    if (await this.page.getByTestId('location-filter-popover').isVisible()) {
+      await this.locationFilterButton.click();
+    }
+  }
+
+  async filterByLocation(locationQuery: string) {
+    if (!(await this.page.getByTestId('location-filter-popover').isVisible())) {
+      await this.locationFilterButton.click();
+    }
+    await this.page.getByTestId('location-filter-input').fill(locationQuery);
+    await this.locationFilterButton.click();
   }
 }

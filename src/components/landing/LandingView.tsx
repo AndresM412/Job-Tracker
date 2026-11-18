@@ -6,9 +6,11 @@ import FilterBar, { type FilterValue } from "../applications/filters/FilterBar";
 import SortControl, { type SortOrder } from "../applications/filters/SortControl";
 import { type JobApplication } from "../../types/job";
 
-interface LandingPageProps {
+interface LandingViewProps {
   onNavigateToAuth: (mode: "login" | "register") => void;
 }
+
+export type LandingPageProps = LandingViewProps;
 
 export type LandingTab = "overview" | "sandbox" | "workflow";
 
@@ -91,7 +93,7 @@ const INITIAL_DEMO_JOBS: JobApplication[] = [
   },
 ];
 
-export const LandingPage: React.FC<LandingPageProps> = ({
+export const LandingView: React.FC<LandingViewProps> = ({
   onNavigateToAuth,
 }) => {
   const [activeTab, setActiveTab] = useState<LandingTab>("overview");
@@ -126,14 +128,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     const matchesSearch =
       job.company.toLowerCase().includes(searchText.toLowerCase()) ||
       job.position.toLowerCase().includes(searchText.toLowerCase()) ||
-      (Array.isArray(job.notes)
-        ? job.notes.some(
-            (n) =>
-              n.title.toLowerCase().includes(searchText.toLowerCase()) ||
-              n.content.toLowerCase().includes(searchText.toLowerCase())
-          )
-        : typeof job.notes === "string" &&
-          job.notes.toLowerCase().includes(searchText.toLowerCase()));
+      (Array.isArray(job.notes) &&
+        job.notes.some(
+          (n) =>
+            n.title.toLowerCase().includes(searchText.toLowerCase()) ||
+            n.content.toLowerCase().includes(searchText.toLowerCase())
+        ));
     return matchesStatus && matchesSearch;
   });
 
@@ -1081,4 +1081,5 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   );
 };
 
-export default LandingPage;
+export const LandingPage = LandingView;
+export default LandingView;
