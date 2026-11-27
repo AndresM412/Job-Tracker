@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import CharacterCounter from "../ui/CharacterCounter";
 
 interface JobDescriptionModalProps {
   isOpen: boolean;
@@ -108,7 +109,7 @@ export const JobDescriptionModal: React.FC<JobDescriptionModalProps> = ({
   return (
     <div
       data-testid="job-description-modal-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
       onClick={onClose}
     >
       <div
@@ -189,6 +190,16 @@ export const JobDescriptionModal: React.FC<JobDescriptionModalProps> = ({
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto overscroll-contain transform-gpu space-y-2 pr-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-on-surface-variant">
+                Description
+              </span>
+              <CharacterCounter
+                current={draft.length}
+                max={MAX_DESCRIPTION_LENGTH}
+                testId="job-description-char-count"
+              />
+            </div>
             <textarea
               data-testid="job-description-textarea"
               value={draft}
@@ -198,11 +209,6 @@ export const JobDescriptionModal: React.FC<JobDescriptionModalProps> = ({
               maxLength={MAX_DESCRIPTION_LENGTH}
               className="w-full bg-surface-container-lowest text-on-surface text-xs sm:text-sm p-3.5 rounded-xl border border-outline-variant/40 focus:border-primary-container/80 focus:outline-none transition-all placeholder:text-outline/70 resize-none leading-relaxed"
             />
-            <div className="flex items-center justify-end text-[10px] text-outline">
-              <span>
-                {draft.length} / {MAX_DESCRIPTION_LENGTH}
-              </span>
-            </div>
           </div>
         )}
 

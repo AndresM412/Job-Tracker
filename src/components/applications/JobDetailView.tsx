@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { type JobApplication, type JobNote } from "../../types/job";
+import { type JobApplication, type JobNote, type JobTimelineEvent, type JobStatus } from "../../types/job";
 import ConfirmDeleteModal from "../ui/ConfirmDeleteModal";
 import NoteModal from "./NoteModal";
 import ConfirmDeleteNoteModal from "./ConfirmDeleteNoteModal";
 import JobDescriptionModal from "./JobDescriptionModal";
 import OfficeMapModal from "./OfficeMapModal";
+import TimelineEventModal from "./TimelineEventModal";
 import * as jobsApi from "../../services/jobsApi";
 import JobDetailHeader from "./job-detail/JobDetailHeader";
 import JobDetailOverview from "./job-detail/JobDetailOverview";
 import JobDescriptionCard from "./job-detail/JobDescriptionCard";
 import JobNotesSection from "./job-detail/JobNotesSection";
+import JobTimelineSection from "./job-detail/JobTimelineSection";
 
 interface JobDetailViewProps {
   job: JobApplication;
@@ -26,11 +28,19 @@ export const JobDetailView: React.FC<JobDetailViewProps> = ({
   onDelete,
   onJobUpdated,
 }) => {
-  const [activeTab, setActiveTab] = useState<"overview" | "notes">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "timeline">("overview");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [notes, setNotes] = useState<JobNote[]>(
     Array.isArray(job.notes) ? job.notes : []
   );
+  const [timelineEvents, setTimelineEvents] = useState<JobTimelineEvent[]>(
+    Array.isArray(job.timelineEvents) ? job.timelineEvents : []
+  );
+
+  // Estados para modal de timeline
+  const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
+  const [selectedTimelineEvent, setSelectedTimelineEvent] = useState<JobTimelineEvent | null>(null);
+  const [timelineModalInitialMode, setTimelineModalInitialMode] = useState<"view" | "edit">("edit");
 
   // Estados para Job Description modal unificado (view/edit)
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
@@ -48,12 +58,76 @@ export const JobDetailView: React.FC<JobDetailViewProps> = ({
   // Estados para mapa de oficina
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
-  // Sincronizar notas si el prop job cambia
+  // Sincronizar notas y timeline si el prop job cambia
   useEffect(() => {
     if (Array.isArray(job.notes)) {
       setNotes(job.notes);
     }
   }, [job.notes, job.id]);
+
+  useEffect(() => {
+    if (Array.isArray(job.timelineEvents) && job.timelineEvents.length > 0) {
+      setTimelineEvents(job.timelineEvents);
+    } else {
+      jobsApi
+        .fetchJobTimeline(job.id)
+        .then((events) => {
+          setTimelineEvents(events);
+        })
+        .catch(() => {});
+    }
+  }, [job.timelineEvents, job.id]);
+
+  const handleOpenAddTimelineEvent = () => {
+    setSelectedTimelineEvent(null);
+    setTimelineModalInitialMode("edit");
+    setIsTimelineModalOpen(true);
+  };
+
+  const handleOpenViewTimelineEvent = (event: JobTimelineEvent) => {
+    setSelectedTimelineEvent(event);
+    setTimelineModalInitialMode("view");
+    setIsTimelineModalOpen(true);
+  };
+
+  const handleOpenEditTimelineEvent = (event: JobTimelineEvent) => {
+    setSelectedTimelineEvent(event);
+    setTimelineModalInitialMode("edit");
+    setIsTimelineModalOpen(true);
+  };
+
+  const handleSaveTimelineEvent = async (data: {
+    stage: JobStatus;
+    date: string;
+    notes?: string;
+  }) => {
+    if (selectedTimelineEvent) {
+      const updated = await jobsApi.updateTimelineEvent(
+        job.id,
+        selectedTimelineEvent.id,
+        data
+      );
+      const newTimeline = timelineEvents
+        .map((e) => (e.id === updated.id ? updated : e))
+        .sort((a, b) => a.date.localeCompare(b.date));
+      setTimelineEvents(newTimeline);
+      onJobUpdated?.({ ...job, timelineEvents: newTimeline });
+    } else {
+      const created = await jobsApi.addTimelineEvent(job.id, data);
+      const newTimeline = [...timelineEvents, created].sort((a, b) =>
+        a.date.localeCompare(b.date)
+      );
+      setTimelineEvents(newTimeline);
+      onJobUpdated?.({ ...job, timelineEvents: newTimeline });
+    }
+  };
+
+  const handleDeleteTimelineEvent = async (event: JobTimelineEvent) => {
+    await jobsApi.deleteTimelineEvent(job.id, event.id);
+    const newTimeline = timelineEvents.filter((e) => e.id !== event.id);
+    setTimelineEvents(newTimeline);
+    onJobUpdated?.({ ...job, timelineEvents: newTimeline });
+  };
 
   const handleOpenAddNote = () => {
     setSelectedNote(null);
@@ -141,6 +215,7 @@ export const JobDetailView: React.FC<JobDetailViewProps> = ({
         activeTab={activeTab}
         onTabChange={setActiveTab}
         notesCount={notes.length}
+        timelineCount={timelineEvents.length}
       />
 
       {/* 2. Disposición según la pestaña activa */}
@@ -158,15 +233,27 @@ export const JobDetailView: React.FC<JobDetailViewProps> = ({
             />
           </div>
 
-          {/* Fila 2: Sección de Notes (ancho completo inferior con State Colocation) */}
-          <div className="flex-1 min-h-0 flex flex-col">
-            <JobNotesSection
-              notes={notes}
-              onAddNote={handleOpenAddNote}
-              onViewNote={handleOpenViewNote}
-              onEditNote={handleOpenEditNote}
-              onDeleteNote={(note) => setNoteToDelete(note)}
-            />
+          {/* Fila 2: Notes (7 cols) + Timeline (5 cols) */}
+          <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 items-stretch">
+            <div className="lg:col-span-7 flex flex-col">
+              <JobNotesSection
+                notes={notes}
+                onAddNote={handleOpenAddNote}
+                onViewNote={handleOpenViewNote}
+                onEditNote={handleOpenEditNote}
+                onDeleteNote={(note) => setNoteToDelete(note)}
+              />
+            </div>
+            <div className="lg:col-span-5 flex flex-col">
+              <JobTimelineSection
+                timeline={timelineEvents}
+                currentStatus={job.status}
+                onAddMilestone={handleOpenAddTimelineEvent}
+                onViewMilestone={handleOpenViewTimelineEvent}
+                onEditMilestone={handleOpenEditTimelineEvent}
+                onDeleteMilestone={handleDeleteTimelineEvent}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -184,7 +271,33 @@ export const JobDetailView: React.FC<JobDetailViewProps> = ({
         </div>
       )}
 
+      {/* Pestaña dedicada Timeline */}
+      {activeTab === "timeline" && (
+        <div className="w-full flex-1">
+          <JobTimelineSection
+            timeline={timelineEvents}
+            currentStatus={job.status}
+            onAddMilestone={handleOpenAddTimelineEvent}
+            onViewMilestone={handleOpenViewTimelineEvent}
+            onEditMilestone={handleOpenEditTimelineEvent}
+            onDeleteMilestone={handleDeleteTimelineEvent}
+          />
+        </div>
+      )}
+
       {/* 3. Diálogos Modales Orquestados */}
+      <TimelineEventModal
+        isOpen={isTimelineModalOpen}
+        onClose={() => {
+          setIsTimelineModalOpen(false);
+          setSelectedTimelineEvent(null);
+        }}
+        event={selectedTimelineEvent}
+        initialMode={timelineModalInitialMode}
+        defaultStage={job.status}
+        onSave={handleSaveTimelineEvent}
+        onDelete={handleDeleteTimelineEvent}
+      />
       <JobDescriptionModal
         isOpen={isDescriptionModalOpen}
         onClose={() => setIsDescriptionModalOpen(false)}

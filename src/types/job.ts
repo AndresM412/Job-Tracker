@@ -17,6 +17,15 @@ export interface JobNote {
   createdAt: string;
 }
 
+export interface JobTimelineEvent {
+  id: string;
+  jobId: string;
+  stage: JobStatus;
+  date: string;
+  notes?: string;
+  createdAt: string;
+}
+
 export type JobApplication = {
   id: string;
   company: string;
@@ -24,6 +33,7 @@ export type JobApplication = {
   status: JobStatus;
   applicationDate: string;
   notes?: JobNote[];
+  timelineEvents?: JobTimelineEvent[];
   salary?: string;
   round?: string;
   description?: string;

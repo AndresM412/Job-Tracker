@@ -188,7 +188,7 @@ export const OfficeMapModal: React.FC<OfficeMapModalProps> = ({
   return (
     <div
       data-testid="office-map-modal-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
       onClick={onClose}
     >
       <div
@@ -286,7 +286,7 @@ export const OfficeMapModal: React.FC<OfficeMapModalProps> = ({
           {noResultsQuery && (
             <div
               data-testid="no-results-assist-card"
-              className="p-3.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/30 text-xs space-y-2.5 animate-in fade-in duration-150"
+              className="p-3.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/30 text-xs space-y-2.5"
             >
               <div className="flex items-start gap-2.5">
                 <span

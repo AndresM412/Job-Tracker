@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { type JobNote } from "../../../types/job";
+import { formatDisplayDate } from "../../../utils/dateUtils";
 
 interface JobNotesSectionProps {
   notes: JobNote[];
@@ -29,26 +30,6 @@ function renderFormattedNotes(text: string) {
     }
     return part;
   });
-}
-
-function formatNoteDate(dateStr?: string) {
-  if (!dateStr) return "";
-  try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    const datePart = d.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-    const timePart = d.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return `${datePart} • ${timePart}`;
-  } catch {
-    return dateStr;
-  }
 }
 
 export const JobNotesSection: React.FC<JobNotesSectionProps> = ({
@@ -231,9 +212,9 @@ export const JobNotesSection: React.FC<JobNotesSectionProps> = ({
                         className="material-symbols-outlined text-[13px]"
                         aria-hidden="true"
                       >
-                        schedule
+                        calendar_today
                       </span>
-                      <span>{formatNoteDate(note.createdAt)}</span>
+                      <span>{formatDisplayDate(note.createdAt)}</span>
                     </span>
                     <button
                       type="button"
