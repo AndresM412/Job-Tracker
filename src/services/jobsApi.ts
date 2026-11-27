@@ -1,4 +1,4 @@
-import { type JobApplication, type JobNote, type WorkMode } from "../types/job";
+import { type JobApplication, type JobNote, type JobTimelineEvent, type JobStatus, type WorkMode } from "../types/job";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
@@ -186,7 +186,99 @@ export async function deleteJobNote(
   }
 }
 
+// --- TIMELINE ---
+
+export async function fetchJobTimeline(jobId: string): Promise<JobTimelineEvent[]> {
+  const response = await fetch(`${API_URL}/jobs/${jobId}/timeline`, {
+    headers: {
+      ...getAuthHeaders(),
+    },
+  });
+  if (response.status === 401) {
+    throw new Error("SESSION_EXPIRED");
+  }
+  if (!response.ok) {
+    throw new Error("Failed to fetch timeline");
+  }
+  const data = await response.json();
+  return data.map(mapTimelineEventFromApi);
+}
+
+export async function addTimelineEvent(
+  jobId: string,
+  payload: { stage: JobStatus; date: string; notes?: string }
+): Promise<JobTimelineEvent> {
+  const response = await fetch(`${API_URL}/jobs/${jobId}/timeline`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+  if (response.status === 401) {
+    throw new Error("SESSION_EXPIRED");
+  }
+  if (!response.ok) {
+    throw new Error(await parseErrorMessage(response, "Failed to add timeline event"));
+  }
+  const data = await response.json();
+  return mapTimelineEventFromApi(data);
+}
+
+export async function updateTimelineEvent(
+  jobId: string,
+  eventId: string,
+  payload: { stage?: JobStatus; date?: string; notes?: string }
+): Promise<JobTimelineEvent> {
+  const response = await fetch(`${API_URL}/jobs/${jobId}/timeline/${eventId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+  if (response.status === 401) {
+    throw new Error("SESSION_EXPIRED");
+  }
+  if (!response.ok) {
+    throw new Error(await parseErrorMessage(response, "Failed to update timeline event"));
+  }
+  const data = await response.json();
+  return mapTimelineEventFromApi(data);
+}
+
+export async function deleteTimelineEvent(
+  jobId: string,
+  eventId: string
+): Promise<void> {
+  const response = await fetch(`${API_URL}/jobs/${jobId}/timeline/${eventId}`, {
+    method: "DELETE",
+    headers: {
+      ...getAuthHeaders(),
+    },
+  });
+  if (response.status === 401) {
+    throw new Error("SESSION_EXPIRED");
+  }
+  if (!response.ok) {
+    throw new Error("Failed to delete timeline event");
+  }
+}
+
 // --- MAPPERS ---
+
+function mapTimelineEventFromApi(apiEvent: any): JobTimelineEvent {
+  return {
+    id: apiEvent.id,
+    jobId: apiEvent.job_id,
+    stage: apiEvent.stage,
+    date: apiEvent.date,
+    notes: apiEvent.notes ?? undefined,
+    createdAt: apiEvent.created_at,
+  };
+}
 
 function mapNoteFromApi(apiNote: any): JobNote {
   return {
@@ -207,6 +299,9 @@ function mapFromApi(apiJob: any): JobApplication {
     status: apiJob.status,
     applicationDate: apiJob.application_date,
     notes: Array.isArray(apiJob.notes) ? apiJob.notes.map(mapNoteFromApi) : [],
+    timelineEvents: Array.isArray(apiJob.timeline_events)
+      ? apiJob.timeline_events.map(mapTimelineEventFromApi)
+      : [],
     salary: apiJob.salary ?? undefined,
     round: apiJob.round ?? undefined,
     description: apiJob.description ?? undefined,

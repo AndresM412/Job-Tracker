@@ -40,6 +40,12 @@ class JobApplication(Base):
         cascade="all, delete-orphan",
         order_by="JobNote.created_at.desc()",
     )
+    timeline_events = relationship(
+        "JobTimelineEvent",
+        back_populates="job",
+        cascade="all, delete-orphan",
+        order_by="JobTimelineEvent.date.asc(), JobTimelineEvent.created_at.asc()",
+    )
     user = relationship("User", back_populates="jobs")
 
 
@@ -62,6 +68,28 @@ class JobNote(Base):
     )
 
     job = relationship("JobApplication", back_populates="notes")
+
+
+class JobTimelineEvent(Base):
+    __tablename__ = "job_timeline_events"
+    id = Column(String, primary_key=True, index=True)
+    job_id = Column(
+        String,
+        ForeignKey("job_applications.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    stage = Column(String(20), nullable=False)
+    date = Column(Date, nullable=False)
+    notes = Column(Text, nullable=True)
+    created_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    job = relationship("JobApplication", back_populates="timeline_events")
 
 
 class User(Base):

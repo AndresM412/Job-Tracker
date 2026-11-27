@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { type JobNote } from "../../types/job";
+import CharacterCounter from "../ui/CharacterCounter";
+import { formatDisplayDate } from "../../utils/dateUtils";
 
 interface NoteModalProps {
   isOpen: boolean;
@@ -32,26 +34,6 @@ function renderFormattedNotes(text: string) {
   });
 }
 
-function formatNoteDate(dateStr?: string) {
-  if (!dateStr) return "";
-  try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    const datePart = d.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-    const timePart = d.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return `${datePart} • ${timePart}`;
-  } catch {
-    return dateStr;
-  }
-}
-
 export const NoteModal: React.FC<NoteModalProps> = ({
   isOpen,
   onClose,
@@ -67,7 +49,7 @@ export const NoteModal: React.FC<NoteModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [openedFromViewMode, setOpenedFromViewMode] = useState(false);
 
-  const MAX_TITLE_LENGTH = 100;
+  const MAX_TITLE_LENGTH = 50;
   const MAX_CONTENT_LENGTH = 4000;
 
   useEffect(() => {
@@ -228,8 +210,11 @@ export const NoteModal: React.FC<NoteModalProps> = ({
               </div>
 
               {note?.createdAt && (
-                <div className="text-[10px] text-outline text-right pt-1">
-                  Recorded on {formatNoteDate(note.createdAt)}
+                <div className="text-[10px] font-mono text-outline flex items-center justify-end gap-1.5 pt-1">
+                  <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
+                    calendar_today
+                  </span>
+                  <span>Recorded on {formatDisplayDate(note.createdAt)}</span>
                 </div>
               )}
             </div>
@@ -290,12 +275,19 @@ export const NoteModal: React.FC<NoteModalProps> = ({
 
               {/* Title Field */}
               <div>
-                <label
-                  htmlFor="note-title-input"
-                  className="block text-xs font-medium text-on-surface mb-1"
-                >
-                  Note Title <span className="text-error">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label
+                    htmlFor="note-title-input"
+                    className="block text-xs font-medium text-on-surface"
+                  >
+                    Note Title <span className="text-error">*</span>
+                  </label>
+                  <CharacterCounter
+                    current={title.length}
+                    max={MAX_TITLE_LENGTH}
+                    testId="note-title-char-count"
+                  />
+                </div>
                 <input
                   id="note-title-input"
                   data-testid="note-title-input"
@@ -307,21 +299,23 @@ export const NoteModal: React.FC<NoteModalProps> = ({
                   className="w-full bg-surface-container-lowest text-on-surface text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-outline-variant/40 focus:border-primary-container/80 focus:outline-none transition-all placeholder:text-outline/70"
                   autoFocus
                 />
-                <div className="flex justify-end mt-1 text-[10px] text-outline">
-                  <span>
-                    {title.length} / {MAX_TITLE_LENGTH}
-                  </span>
-                </div>
               </div>
 
               {/* Content Field */}
               <div>
-                <label
-                  htmlFor="note-content-input"
-                  className="block text-xs font-medium text-on-surface mb-1"
-                >
-                  Note Content <span className="text-error">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label
+                    htmlFor="note-content-input"
+                    className="block text-xs font-medium text-on-surface"
+                  >
+                    Note Content <span className="text-error">*</span>
+                  </label>
+                  <CharacterCounter
+                    current={content.length}
+                    max={MAX_CONTENT_LENGTH}
+                    testId="note-content-char-count"
+                  />
+                </div>
                 <textarea
                   id="note-content-input"
                   data-testid="note-content-input"
@@ -332,11 +326,6 @@ export const NoteModal: React.FC<NoteModalProps> = ({
                   maxLength={MAX_CONTENT_LENGTH}
                   className="w-full bg-surface-container-lowest text-on-surface text-xs sm:text-sm p-3.5 rounded-xl border border-outline-variant/40 focus:border-primary-container/80 focus:outline-none transition-all placeholder:text-outline/70 resize-none leading-relaxed"
                 />
-                <div className="flex justify-end mt-1 text-[10px] text-outline">
-                  <span>
-                    {content.length} / {MAX_CONTENT_LENGTH}
-                  </span>
-                </div>
               </div>
             </div>
 

@@ -114,7 +114,7 @@ test.describe('Notas Modulares con Título (Roadmap Item 4)', () => {
     await expect(dashboard.notesCountBadge).toHaveText('0');
   });
 
-  test('el usuario puede buscar notas por título y ver el detalle completo en el modal de lectura', async ({ page }) => {
+  test('el usuario puede buscar notas por título y ver el detalle completo en el modal de lectura', async ({ page, browserName }) => {
     const dashboard = new DashboardPage(page);
     await dashboard.goto();
 
@@ -154,17 +154,21 @@ test.describe('Notas Modulares con Título (Roadmap Item 4)', () => {
     // Probar transición in-situ a modo edición dentro del mismo modal delimitando al modal activo
     const editBtn = detailModal.getByTestId('modal-edit-note-btn');
     await expect(editBtn).toBeVisible();
-    await editBtn.click();
+    await expect(editBtn).toBeEnabled();
+    await editBtn.click({ force: browserName === 'webkit' });
     await expect(dashboard.noteTitleInput).toBeVisible();
     await expect(dashboard.noteTitleInput).toHaveValue('Technical Interview Loop');
 
     // Cancelar edición in-situ y verificar que regresa a modo lectura sin cerrar el modal
-    await dashboard.noteCancelButton.click();
+    await dashboard.noteCancelButton.click({ force: browserName === 'webkit' });
     await expect(dashboard.noteTitleInput).not.toBeVisible();
     await expect(detailModal).toContainText('Coding challenge on asynchronous streams');
 
     // Cerrar modal de lectura usando la "X" accesible del header
-    await detailModal.getByRole('button', { name: 'Close dialog' }).click();
+    const closeBtn = detailModal.getByRole('button', { name: 'Close dialog' });
+    await expect(closeBtn).toBeVisible();
+    await expect(closeBtn).toBeEnabled();
+    await closeBtn.click({ force: browserName === 'webkit' });
     await expect(detailModal).not.toBeVisible();
   });
 
@@ -193,7 +197,7 @@ test.describe('Notas Modulares con Título (Roadmap Item 4)', () => {
     await expect(dashboard.notesCountBadge).toHaveText('1');
   });
 
-  test('el usuario puede agregar y actualizar la descripción de la vacante inline con límite y modal de lectura', async ({ page }) => {
+  test('el usuario puede agregar y actualizar la descripción de la vacante inline con límite y modal de lectura', async ({ page, browserName }) => {
     const dashboard = new DashboardPage(page);
     await dashboard.goto();
 
@@ -232,16 +236,24 @@ test.describe('Notas Modulares con Título (Roadmap Item 4)', () => {
     await expect(descModal).toContainText('Design and architect fault-tolerant payment gateway');
 
     // Probar transición in-situ a modo edición dentro del mismo modal
-    await page.getByTestId('modal-edit-description-btn').click();
+    const modalEditDescBtn = descModal.getByTestId('modal-edit-description-btn');
+    await expect(modalEditDescBtn).toBeVisible();
+    await expect(modalEditDescBtn).toBeEnabled();
+    await modalEditDescBtn.click({ force: browserName === 'webkit' });
     await expect(descTextarea).toBeVisible();
 
     // Cancelar y verificar que regresa a modo lectura sin cerrar el modal
-    await page.getByRole('button', { name: 'Cancel' }).click();
+    const modalCancelDescBtn = descModal.getByRole('button', { name: 'Cancel' });
+    await expect(modalCancelDescBtn).toBeVisible();
+    await modalCancelDescBtn.click({ force: browserName === 'webkit' });
     await expect(descTextarea).not.toBeVisible();
     await expect(descModal).toContainText('Design and architect fault-tolerant payment gateway');
 
     // Cerrar modal usando la "X" accesible del header
-    await descModal.getByRole('button', { name: 'Close dialog' }).click();
+    const closeDescBtn = descModal.getByRole('button', { name: 'Close dialog' });
+    await expect(closeDescBtn).toBeVisible();
+    await expect(closeDescBtn).toBeEnabled();
+    await closeDescBtn.click({ force: browserName === 'webkit' });
     await expect(descModal).not.toBeVisible();
 
     // Verificar que el header muestra únicamente el botón 'Update'

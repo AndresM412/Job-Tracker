@@ -8,9 +8,10 @@ interface JobDetailHeaderProps {
   onBack: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  activeTab: "overview" | "notes";
-  onTabChange: (tab: "overview" | "notes") => void;
+  activeTab: "overview" | "notes" | "timeline";
+  onTabChange: (tab: "overview" | "notes" | "timeline") => void;
   notesCount: number;
+  timelineCount?: number;
 }
 
 export const JobDetailHeader: React.FC<JobDetailHeaderProps> = ({
@@ -21,6 +22,7 @@ export const JobDetailHeader: React.FC<JobDetailHeaderProps> = ({
   activeTab,
   onTabChange,
   notesCount,
+  timelineCount = 0,
 }) => {
   return (
     <div className="space-y-2 sm:space-y-2.5 shrink-0">
@@ -137,6 +139,26 @@ export const JobDetailHeader: React.FC<JobDetailHeaderProps> = ({
               </span>
             )}
             {activeTab === "notes" && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_8px_rgba(129,140,248,0.8)]" />
+            )}
+          </button>
+          <button
+            type="button"
+            data-testid="tab-timeline"
+            onClick={() => onTabChange("timeline")}
+            className={`relative pb-2 text-xs sm:text-sm transition-colors flex items-center gap-2 cursor-pointer ${
+              activeTab === "timeline"
+                ? "text-on-surface font-bold"
+                : "text-on-surface-variant hover:text-on-surface font-medium"
+            }`}
+          >
+            <span>Timeline</span>
+            {timelineCount > 0 && (
+              <span className="px-2 py-0.5 text-[10px] rounded-full bg-surface-container-highest border border-outline-variant/40 text-primary font-mono font-bold">
+                {timelineCount}
+              </span>
+            )}
+            {activeTab === "timeline" && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_8px_rgba(129,140,248,0.8)]" />
             )}
           </button>

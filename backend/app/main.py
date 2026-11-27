@@ -39,6 +39,35 @@ def _ensure_extra_job_columns() -> None:
 
 _ensure_extra_job_columns()
 
+
+def _ensure_initial_timeline_events() -> None:
+    """Asegura que empleos existentes sin timeline tengan al menos su hito inicial."""
+    inspector = inspect(engine)
+    if "job_applications" not in inspector.get_table_names() or "job_timeline_events" not in inspector.get_table_names():
+        return
+
+    with Session(bind=engine) as db:
+        try:
+            jobs = db.query(models.JobApplication).all()
+            for job in jobs:
+                if not job.timeline_events:
+                    import uuid
+                    from datetime import date
+                    event = models.JobTimelineEvent(
+                        id=str(uuid.uuid4()),
+                        job_id=job.id,
+                        stage=job.status or "Applied",
+                        date=job.application_date or date.today(),
+                        notes="Application submitted",
+                    )
+                    db.add(event)
+            db.commit()
+        except Exception:
+            db.rollback()
+
+
+_ensure_initial_timeline_events()
+
 app = FastAPI()
 
 app.add_middleware(
@@ -165,6 +194,79 @@ def delete_job_note(
     if db_note is None:
         raise HTTPException(status_code=404, detail="Note or Job not found")
     return {"message": "Note deleted successfully"}
+
+
+# --- TIMELINE ENDPOINTS ---
+
+
+@app.get(
+    "/jobs/{job_id}/timeline",
+    response_model=List[schemas.JobTimelineEventResponse],
+)
+def read_job_timeline(
+    job_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    timeline = crud.get_job_timeline(db, job_id, user_id=current_user.id)
+    if timeline is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return timeline
+
+
+@app.post(
+    "/jobs/{job_id}/timeline",
+    response_model=schemas.JobTimelineEventResponse,
+)
+def create_job_timeline_event(
+    job_id: str,
+    event: schemas.JobTimelineEventCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    try:
+        db_event = crud.create_job_timeline_event(
+            db, job_id, event, user_id=current_user.id
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    if db_event is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return db_event
+
+
+@app.put(
+    "/jobs/{job_id}/timeline/{event_id}",
+    response_model=schemas.JobTimelineEventResponse,
+)
+def update_job_timeline_event(
+    job_id: str,
+    event_id: str,
+    event: schemas.JobTimelineEventUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    db_event = crud.update_job_timeline_event(
+        db, job_id, event_id, event, user_id=current_user.id
+    )
+    if db_event is None:
+        raise HTTPException(status_code=404, detail="Timeline event or Job not found")
+    return db_event
+
+
+@app.delete("/jobs/{job_id}/timeline/{event_id}")
+def delete_job_timeline_event(
+    job_id: str,
+    event_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    db_event = crud.delete_job_timeline_event(
+        db, job_id, event_id, user_id=current_user.id
+    )
+    if db_event is None:
+        raise HTTPException(status_code=404, detail="Timeline event or Job not found")
+    return {"message": "Timeline event deleted successfully"}
 
 
 # --- AUTH ENDPOINTS ---
