@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date as dt_date, datetime
 import re
 from typing import List, Literal, Optional
 from urllib.parse import urlparse
@@ -9,6 +9,8 @@ WorkMode = Literal["Remote", "On-site", "Hybrid"]
 
 _URI_SCHEME_RE = re.compile(r"^([a-zA-Z][a-zA-Z0-9+.-]*):")
 _MAX_JOB_URL_LENGTH = 500
+_MAX_NOTE_TITLE_LENGTH = 50
+_MAX_TIMELINE_NOTES_LENGTH = 500
 
 
 def normalize_and_validate_job_url(value: Optional[str]) -> Optional[str]:
@@ -74,15 +76,55 @@ class JobNoteBase(BaseModel):
 
 
 class JobNoteCreate(JobNoteBase):
-    pass
+    title: str = Field(..., max_length=_MAX_NOTE_TITLE_LENGTH)
 
 
 class JobNoteUpdate(BaseModel):
-    title: Optional[str] = None
+    title: Optional[str] = Field(default=None, max_length=_MAX_NOTE_TITLE_LENGTH)
     content: Optional[str] = None
 
 
 class JobNoteResponse(JobNoteBase):
+    """Schema de salida: sin límite estricto de 50 chars para compatibilidad con notas previas."""
+
+    id: str
+    job_id: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# --- Schemas para JobTimelineEvent (Hitos del Timeline) ---
+
+
+class _TimelineNotesValidationMixin:
+    """Validación y sanitización aplicada únicamente a payloads de entrada."""
+
+    @field_validator("notes")
+    @classmethod
+    def sanitize_notes(cls, value: Optional[str]) -> Optional[str]:
+        return clean_optional_text(value)
+
+
+class JobTimelineEventBase(BaseModel):
+    stage: str
+    date: dt_date
+    notes: Optional[str] = None
+
+
+class JobTimelineEventCreate(_TimelineNotesValidationMixin, JobTimelineEventBase):
+    notes: Optional[str] = Field(default=None, max_length=_MAX_TIMELINE_NOTES_LENGTH)
+
+
+class JobTimelineEventUpdate(_TimelineNotesValidationMixin, BaseModel):
+    stage: Optional[str] = None
+    date: Optional[dt_date] = None
+    notes: Optional[str] = Field(default=None, max_length=_MAX_TIMELINE_NOTES_LENGTH)
+
+
+class JobTimelineEventResponse(JobTimelineEventBase):
+    """Schema de salida: no hereda max_length para serializar registros históricos > 500 chars sin 500."""
+
     id: str
     job_id: str
     created_at: datetime
@@ -118,7 +160,7 @@ class JobApplicationBase(_JobFieldsValidationMixin, BaseModel):
     company: str
     position: str
     status: str
-    application_date: date
+    application_date: dt_date
     salary: Optional[str] = None
     round: Optional[str] = None
     description: Optional[str] = None
@@ -141,7 +183,7 @@ class JobApplicationPatch(_JobFieldsValidationMixin, BaseModel):
     company: Optional[str] = None
     position: Optional[str] = None
     status: Optional[str] = None
-    application_date: Optional[date] = None
+    application_date: Optional[dt_date] = None
     salary: Optional[str] = None
     round: Optional[str] = None
     description: Optional[str] = None
@@ -165,6 +207,7 @@ class JobApplicationResponse(JobApplicationBase):
     id: str
     created_at: Optional[datetime] = None
     notes: List[JobNoteResponse] = []
+    timeline_events: List[JobTimelineEventResponse] = []
 
     model_config = ConfigDict(from_attributes=True)
 

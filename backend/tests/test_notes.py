@@ -177,3 +177,33 @@ def test_multi_tenancy_notes_isolation(client):
     assert len(get_owner.json()) == 1
     assert get_owner.json()[0]["title"] == "Confidential Note"
 
+
+def test_note_title_max_length_validation(client):
+    headers = get_auth_headers(client, "notes_maxlen@example.com")
+    job_id = create_sample_job(client, headers)
+
+    # Más de 50 caracteres debe rechazarse con 422
+    too_long_res = client.post(
+        f"/jobs/{job_id}/notes",
+        json={"title": "T" * 51, "content": "Valid content"},
+        headers=headers,
+    )
+    assert too_long_res.status_code == 422
+
+    # Exactamente 50 caracteres debe aceptarse
+    ok_res = client.post(
+        f"/jobs/{job_id}/notes",
+        json={"title": "T" * 50, "content": "Valid content"},
+        headers=headers,
+    )
+    assert ok_res.status_code == 200
+    note_id = ok_res.json()["id"]
+
+    # En PUT tampoco debe permitir > 50 caracteres
+    too_long_put = client.put(
+        f"/jobs/{job_id}/notes/{note_id}",
+        json={"title": "U" * 51},
+        headers=headers,
+    )
+    assert too_long_put.status_code == 422
+
