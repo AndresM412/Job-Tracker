@@ -216,6 +216,7 @@ test.describe("Campos Adicionales, Prioridad In-Situ, Mapa y Filtros", () => {
 
   test("permite buscar y guardar coordenadas de oficina en el mapa (mock de Nominatim), persistir en backend y abrir Google Maps", async ({
     page,
+    browserName,
   }) => {
     // Interceptar peticiones externas a Nominatim para que el test sea 100% determinista en CI
     await page.route(
@@ -286,8 +287,12 @@ test.describe("Campos Adicionales, Prioridad In-Situ, Mapa y Filtros", () => {
     await expect(themeToggle).toContainText("Dark Map");
 
     // Guardar pin en PostgreSQL real vía PATCH
-    await page.getByTestId("save-office-btn").click();
-    await expect(page.getByTestId("office-map-modal")).not.toBeVisible();
+    const officeModal = page.getByTestId("office-map-modal");
+    const saveOfficeBtn = officeModal.getByTestId("save-office-btn");
+    await expect(saveOfficeBtn).toBeVisible();
+    await expect(saveOfficeBtn).toBeEnabled();
+    await saveOfficeBtn.click({ force: browserName === "webkit" });
+    await expect(officeModal).not.toBeVisible();
     await expect(page.getByTestId("open-office-map-btn")).toContainText(
       "View Office Map",
     );
@@ -304,8 +309,11 @@ test.describe("Campos Adicionales, Prioridad In-Situ, Mapa y Filtros", () => {
     await expect(persistedMap).toHaveAttribute("data-lng", "-74.0537");
 
     // Limpiar pin guardado
-    await page.getByTestId("clear-office-btn").click();
-    await expect(page.getByTestId("office-map-modal")).not.toBeVisible();
+    const clearOfficeBtn = officeModal.getByTestId("clear-office-btn");
+    await expect(clearOfficeBtn).toBeVisible();
+    await expect(clearOfficeBtn).toBeEnabled();
+    await clearOfficeBtn.click({ force: browserName === "webkit" });
+    await expect(officeModal).not.toBeVisible();
     await expect(page.getByTestId("open-office-map-btn")).toContainText(
       "Pin Office",
     );
